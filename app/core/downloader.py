@@ -42,7 +42,7 @@ class Downloader:
                 print(str(e))
                 return []
 
-    def download(self, url: str):
+    def download(self, url: str):  # Descarga del archivo
         with YoutubeDL(self.yt_opts) as ytdlp:
             ytdlp.download(url)
 
@@ -52,9 +52,9 @@ class Downloader:
     def _build_opts(self, destination: str, format: str, progress_callback) -> dict:
         opts = {
             "retries": 3,
-            "overwrites": False,
+            "overwrites": False,  # Si existe el archivo no lo reescribimos
             "fragment_retries": 3,
-            "noplaylist": True,
+            "noplaylist": True,  # Evitamos  que descargue toda la playlist en el caso de que el link sea de un video sacada desde su playlist
             "outtmpl": f"{destination}/%(title)s.%(ext)s",
             "concurrent_fragment_downloads": 3,
             "continuedl": True,

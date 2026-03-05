@@ -13,6 +13,7 @@ class Download:
     destination_path: str
 
     id: Optional[int] = None
+    yt_id: str
     playlist_id: Optional[int] = (
         None  # FK a PlaylistDownload, None si es descarga individual
     )
@@ -33,6 +34,7 @@ class PlaylistDownload:
     destination_path: str
 
     id: Optional[int] = None
+    yt_id: str
     total_items: int = 0
     completed_items: int = 0
     failed_items: int = 0

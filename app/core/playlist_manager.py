@@ -1,5 +1,7 @@
 from PySide6.QtCore import QObject, Signal
 from .download_worker import DownloadWorker
+from ..database.db_manager import DBManager
+from ..database.models import Download, PlaylistDownload
 
 
 class PlaylistManager(QObject):
@@ -7,22 +9,67 @@ class PlaylistManager(QObject):
     item_failed = Signal(int, str)  # download_id, error message
     all_finished = Signal()
 
-    def __init__(self, max_concurrent: int = 2):
+    def __init__(self, db: DBManager, max_concurrent: int = 2):
         super().__init__()
+        self._db = db
         self._workers: dict[int, DownloadWorker] = {}  # Descargas activas
         self._queue: list[dict] = []  # Lista de espera en descargas
         self.max_concurrent = max_concurrent
 
-    def enqueue(self, url, format, destination, download_id):
+    def enqueue(
+        self,
+        url,
+        format,
+        destination,
+        yt_id,
+        yt_playlist_id=None,
+        playlist_url: str = None,
+        playlist_title: str = None,
+        playlist_t_items: int = 0,
+    ) -> int:
+
+        # Si hay un id de playlist, revisamos en DB si ya existe, de no ser asi, la insertamos
+        playlist_id = None
+        if yt_playlist_id:
+            playlist_id = self._db.get_playlist_by_yt_id(yt_playlist_id)
+            if not playlist_id:
+                playlist_id = self._db.insert_playlist(
+                    PlaylistDownload(
+                        url=playlist_url,
+                        title=playlist_title,
+                        format=format,
+                        status="pending",
+                        destination_path=destination,
+                        yt_id=yt_playlist_id,
+                        total_items=playlist_t_items,
+                    )
+                )
+
+        download_id = self._db.insert_download(
+            Download(
+                url=url,
+                title="",
+                format=format,
+                status="pending",
+                destination_path=destination,
+                playlist_id=playlist_id,
+                yt_id=yt_id,
+            )
+        )
         self._queue.append(
             {
                 "id": download_id,
+                "yt_id": yt_id,
+                "playlist_id": yt_playlist_id,
                 "url": url,
                 "destination": destination,
                 "format": format,
+                "status": "pending",
             }
         )
-        self._start_next()#Una vez encolado, iniciamos el siguiente
+        self._start_next()  # Una vez encolado, iniciamos el siguiente
+
+        return download_id
 
     def cancel_item(self, download_id: int) -> None:
         if (
@@ -34,12 +81,17 @@ class PlaylistManager(QObject):
         for eq in range(0, len(self._queue)):  # Buscamos si esta en la cola de espera
             if self._queue[eq]["id"] == download_id:
                 self._queue.pop(eq)
+                self._db.update_downloaded_status(download_id, "cancelled")
 
     def cancel_all(self) -> None:
         # Cancelamos descargas en proceso
         for _, worker in self._workers.items():
             worker.cancel()
         # vaciamos lista de espera
+        for el in self._queue:
+            self._db.update_downloaded_status(
+                el["id"], "cancelled"
+            )  # Actualizamos todos los pendientes a cancelados
         self._queue = []
 
     def _start_next(self):
@@ -59,10 +111,36 @@ class PlaylistManager(QObject):
             new_worker["id"],
         )
         self._queue.pop(0)  # Quitamos de la cola de espera
+        self._workers[new_worker["id"]].status_changed.connect(
+            lambda status: self._db.update_downloaded_status(new_worker["id"], status)
+        )
+        self._workers[new_worker["id"]].error.connect(
+            lambda error: self._db.update_downloaded_status(
+                new_worker["id"], "failed", error
+            )
+        )
         self._workers[new_worker["id"]].finished.connect(self._on_work_finished)
         self._workers[new_worker["id"]].start()
 
     def _on_work_finished(self, download_id: int):
         self.item_finished.emit(download_id)
         del self._workers[download_id]
+
+        # Revisamos si hay una playlist asiciada a la descarga
+        playlist_id = self._db.get_playlist_id(download_id)
+        if playlist_id:
+            playlist = self._db.get_playlist_by_id(playlist_id)
+            downloads = self._db.get_downloads_by_playlist(playlist_id)
+            # Calculamos fallos y completadas con exito
+            failures = len(
+                [d for d in downloads if d.status in ("failed", "cancelled")]
+            )
+            completed = len([d for d in downloads if d.status == "completed"])
+            if (
+                playlist.total_items > 0
+                and (failures + completed) >= playlist.total_items
+            ):  # Si la suma de fallos y completados no es igual al total, entonces aun no termina, pero si es igual o mayor es que termino ya
+                final_status = "completed" if failures == 0 else "partial"
+                self._db.update_playlist_status(playlist_id, final_status)
+
         self._start_next()  # Revisamos si hay algun otro elemento en la cola

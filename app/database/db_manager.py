@@ -29,6 +29,7 @@ class DBManager:
             """
                CREATE TABLE IF NOT EXISTS playlist_downloads (
                     id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                    yt_id            TEXT    NOT NULL,
                     url              TEXT    NOT NULL,
                     title            TEXT    NOT NULL,
                     format           TEXT    NOT NULL CHECK(format IN ('mp4', 'mp3')),
@@ -45,6 +46,7 @@ class DBManager:
 
                CREATE TABLE IF NOT EXISTS downloads (
                     id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                    yt_id            TEXT    NOT NULL,
                     url              TEXT    NOT NULL,
                     title            TEXT    NOT NULL,
                     format           TEXT    NOT NULL CHECK(format IN ('mp4', 'mp3')),
@@ -74,10 +76,11 @@ class DBManager:
         with self._connect() as conn:
             cursor = conn.execute(
                 """
-                         INSERT INTO downloads (url, title, format, status, detination_path, playlist_id, file_size, duration, thumbnail_url, error_message, created_at, updated_at)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         INSERT INTO downloads (yt_id, url, title, format, status, destination_path, playlist_id, file_size, duration, thumbnail_url, error_message, created_at, updated_at)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                 (
+                    download.yt_id,
                     download.url,
                     download.title,
                     download.format,
@@ -88,8 +91,8 @@ class DBManager:
                     download.duration,
                     download.thumbnail_url,
                     download.error_message,
-                    download.created_at,
-                    download.updated_at,
+                    now,
+                    now,
                 ),
             )
             return cursor.lastrowid
@@ -119,7 +122,7 @@ class DBManager:
     def get_download_by_id(self, download_id: int) -> Optional[Download]:
         with self._connect() as conn:
             row = conn.execute(
-                "SELECT * FROM downloads WHERE id = ?", (download_id)
+                "SELECT * FROM downloads WHERE id = ?", (download_id,)
             ).fetchone()
 
         return self._row_to_download(row) if row else None
@@ -138,18 +141,25 @@ class DBManager:
 
         return [self._row_to_download(r) for r in rows]
 
+    # Obtenemos el playlist id de la descarga
+    def get_playlist_id(self, download_id: int) -> Optional[int]:
+        download = self.get_download_by_id(download_id)
+        if download:
+            return download.playlist_id
+        return None
+
     def get_downloads_by_playlist(self, playlist_id: int):
         with self._connect() as conn:
             rows = conn.execute(
                 "SELECT * FROM downloads WHERE playlist_id = ? ORDER BY created_at ASC",
-                (playlist_id),
+                (playlist_id,),
             ).fetchall()
 
         return [self._row_to_download(r) for r in rows]
 
     def delete_download(self, download_id: int):
         with self._connect() as conn:
-            conn.execute("DELETE FROM downloads WHERE id = ?", (download_id))
+            conn.execute("DELETE FROM downloads WHERE id = ?", (download_id,))
 
     # CRUD playlists
     def insert_playlist(self, playlist: PlaylistDownload) -> int:
@@ -157,14 +167,14 @@ class DBManager:
         with self._connect() as conn:
             cursor = conn.execute(
                 """
-                    INSERT INTO playlist_downloads (url, title, format, status, destination_path, total_items, completed_items, failed_items, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO playlist_downloads (yt_id, url, title, format, status, destination_path, total_items, completed_items, failed_items, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                """,
                 (
+                    playlist.yt_id,
                     playlist.url,
                     playlist.title,
-                    playlist,
-                    format,
+                    playlist.format,
                     playlist.status,
                     playlist.destination_path,
                     playlist.total_items,
@@ -188,18 +198,41 @@ class DBManager:
                     ),
                     failed_items = (
                          SELECT COUNT(*) FROM downloads
-                         WHERE playlist_id = ? AND statu IN ('failed', 'cancelled')
+                         WHERE playlist_id = ? AND status IN ('failed', 'cancelled')
                     ),
+                    status = ?,
                     updated_at = ?
                WHERE id = ?      
                """,
-                (playlist_id, playlist_id, datetime.now().isoformat(), playlist_id),
+                (
+                    playlist_id,
+                    playlist_id,
+                    status,
+                    datetime.now().isoformat(),
+                    playlist_id,
+                ),
             )
+
+    def update_playlist_info(self, playlist_id: int, **kwargs):
+        if not kwargs:
+            return
+        kwargs["updated_at"] = datetime.now().isoformat()
+        columns = ", ".join(f"{k} = ?" for k in kwargs)
+        values = list(kwargs.values()) + [playlist_id]
+        with self._connect() as conn:
+            conn.execute(f"UPDATE playlist_downloads SET {columns} WHERE id = ?", values)
 
     def get_playlist_by_id(self, playlist_id: int) -> Optional[PlaylistDownload]:
         with self._connect() as conn:
             row = conn.execute(
-                "SELECT * FROM playlist_downloads WHERE id = ?", (playlist_id)
+                "SELECT * FROM playlist_downloads WHERE id = ?", (playlist_id,)
+            ).fetchone()
+        return self._row_to_playlist(row) if row else None
+
+    def get_playlist_by_yt_id(self, yt_id: str) -> Optional[PlaylistDownload]:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM playlist_downloads WHERE yt_id = ?", (yt_id,)
             ).fetchone()
         return self._row_to_playlist(row) if row else None
 
@@ -208,7 +241,7 @@ class DBManager:
     ) -> list[PlaylistDownload]:
         with self._connect() as conn:
             rows = conn.execute(
-                "SELECT * FROM playlist_downloads ORDER BY created_at DES LIMIT ? OFFSET ?",
+                "SELECT * FROM playlist_downloads ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 (limit, offset),
             ).fetchall()
 
@@ -217,12 +250,13 @@ class DBManager:
     def delete_playlist(self, playlist_id: int):
         with self._connect() as conn:
             # Por la configuracion, cuando se elimine una playlist todos los videos en downloads que esten asociados a ella quedaran con playlist_id en NULL
-            conn.execute("DELETE FROM playlist_downloads WHERE id = ?", (playlist_id))
+            conn.execute("DELETE FROM playlist_downloads WHERE id = ?", (playlist_id,))
 
     @staticmethod
     def _row_to_download(row: sqlite3.Row) -> Download:
         return Download(
             id=row["id"],
+            yt_id=row["yt_id"],
             url=row["url"],
             title=row["title"],
             format=row["format"],
@@ -241,6 +275,7 @@ class DBManager:
     def _row_to_playlist(row: sqlite3.Row) -> PlaylistDownload:
         return PlaylistDownload(
             id=row["id"],
+            yt_id=row["yt_id"],
             url=row["url"],
             title=row["title"],
             format=row["format"],

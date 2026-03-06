@@ -8,6 +8,9 @@ class PlaylistManager(QObject):
     item_finished = Signal(int)  # download_id
     item_failed = Signal(int, str)  # download_id, error message
     all_finished = Signal()
+    item_started = Signal(
+        int, DownloadWorker
+    )  # Con este signal controlamos cuando un worker es iniciado en las descargas
 
     def __init__(self, db: DBManager, max_concurrent: int = 2):
         super().__init__()
@@ -94,6 +97,9 @@ class PlaylistManager(QObject):
             )  # Actualizamos todos los pendientes a cancelados
         self._queue = []
 
+    def get_worker(self, download_id: int) -> DownloadWorker | None:
+        return self._workers.get(download_id)
+
     def _start_next(self):
         # Revisamos primero si no se esta excedieno el limiete de concurrencia
         if len(self._workers) >= self.max_concurrent:
@@ -121,6 +127,8 @@ class PlaylistManager(QObject):
         )
         self._workers[new_worker["id"]].finished.connect(self._on_work_finished)
         self._workers[new_worker["id"]].start()
+
+        self.item_started.emit(new_worker["id"], self._workers[new_worker["id"]])
 
     def _on_work_finished(self, download_id: int):
         self.item_finished.emit(download_id)

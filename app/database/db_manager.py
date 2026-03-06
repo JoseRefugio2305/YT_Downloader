@@ -134,7 +134,7 @@ class DBManager:
             query += " WHERE status = ?"
             params.append(status)
 
-        query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+        query += " ORDER BY COALESCE(playlist_id, id), playlist_id NULLS LAST, created_at DESC LIMIT ? OFFSET ?"
         params += [limit, offset]
         with self._connect() as conn:
             rows = conn.execute(query, params).fetchall()
@@ -220,7 +220,9 @@ class DBManager:
         columns = ", ".join(f"{k} = ?" for k in kwargs)
         values = list(kwargs.values()) + [playlist_id]
         with self._connect() as conn:
-            conn.execute(f"UPDATE playlist_downloads SET {columns} WHERE id = ?", values)
+            conn.execute(
+                f"UPDATE playlist_downloads SET {columns} WHERE id = ?", values
+            )
 
     def get_playlist_by_id(self, playlist_id: int) -> Optional[PlaylistDownload]:
         with self._connect() as conn:

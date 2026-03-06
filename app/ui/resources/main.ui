@@ -51,7 +51,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
@@ -218,10 +218,47 @@
         <property name="geometry">
          <rect>
           <x>10</x>
-          <y>10</y>
+          <y>60</y>
           <width>681</width>
-          <height>601</height>
+          <height>551</height>
          </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="btnLimpiarH">
+        <property name="geometry">
+         <rect>
+          <x>530</x>
+          <y>10</y>
+          <width>161</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Limpiar Historial</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboStatus">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>10</y>
+          <width>231</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
         </property>
        </widget>
       </widget>

@@ -19,7 +19,7 @@ class Downloader:
         }
 
     # Metadata sin descargar
-    def extract_video_info(self, url: str) -> List[dict]:
+    def extract_video_info(self, url: str) -> dict:
         with YoutubeDL(self.yt_dlp_info) as ytdl:
             try:
                 info = ytdl.extract_info(url, download=False)
@@ -29,6 +29,7 @@ class Downloader:
                     return None
             except Exception as e:
                 print(str(e))
+                return None
 
     def extract_playlist_info(self, url: str) -> List[dict]:
         with YoutubeDL(self.yt_dlp_info) as ytdl:

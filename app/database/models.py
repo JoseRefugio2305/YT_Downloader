@@ -11,9 +11,9 @@ class Download:
     format: str  # 'mp4' | 'mp3'
     status: str  # 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled'
     destination_path: str
+    yt_id: str
 
     id: Optional[int] = None
-    yt_id: str
     playlist_id: Optional[int] = (
         None  # FK a PlaylistDownload, None si es descarga individual
     )
@@ -32,9 +32,9 @@ class PlaylistDownload:
     format: str  # 'mp4' | 'mp3'
     status: str  # 'pending' | 'downloading' | 'completed' | 'partial' | 'failed' | 'cancelled'
     destination_path: str
+    yt_id: str
 
     id: Optional[int] = None
-    yt_id: str
     total_items: int = 0
     completed_items: int = 0
     failed_items: int = 0

@@ -24,7 +24,7 @@ def is_valid_youtube_url(url: str) -> bool:
 
 
 def detect_url_type(url: str) -> str:
-    if VIDEO_PLAYLIST_REGEX(url):
+    if VIDEO_PLAYLIST_REGEX.match(url):
         return "video/playlist"
     elif (
         VIDEO_COMP_REGEX.match(url)

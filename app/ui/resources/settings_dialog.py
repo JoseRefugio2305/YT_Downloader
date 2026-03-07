@@ -85,7 +85,7 @@ class SettingsDialog(QDialog):
         font2.setItalic(False)
         self.lbl_dest_ind = QLabel("Carpeta de descargas: ")
         self.lbl_dest_ind.setFont(font2)
-        self.lbl_dest_sel = QLabel(self.get_destination())
+        self.lbl_dest_sel = QLabel(str(self.get_destination()))
         self.lbl_dest_sel.setFont(font2)
         self.btn_select_route = QPushButton()
         self.btn_select_route.setObjectName("btnSelRoute")
@@ -165,7 +165,7 @@ class SettingsDialog(QDialog):
         self.setLayout(self.layoutPrinc)
 
     def get_destination(self) -> str:
-        path = self._settings.value("destination", Path.home() / "Downloads")
+        path = self._settings.value("destination", Path.home() / "Downloads", type=str)
         return path
 
     def get_max_concurrent(self) -> int:

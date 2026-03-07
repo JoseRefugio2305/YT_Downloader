@@ -38,7 +38,6 @@ class DownloadWorker(QThread):
         try:
             if self._cancelled:
                 raise Exception("Descarga Cancelada")
-            print(data)
             total = data.get("total_bytes") or data.get("total_bytes_estimate") or 0
             if total:
                 porcentaje = int(data["downloaded_bytes"] * 100 / total)

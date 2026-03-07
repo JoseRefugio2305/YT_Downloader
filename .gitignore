@@ -1,5 +1,7 @@
 **/__pycache__
 myvenv
 data/*
+ffmpeg/*
 !data/.gitkeep
+!ffmpeg/.gitkeep
 tests/

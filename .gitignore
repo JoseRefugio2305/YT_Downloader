@@ -2,3 +2,4 @@
 myvenv
 data/*
 !data/.gitkeep
+tests/

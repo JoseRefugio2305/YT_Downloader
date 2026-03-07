@@ -132,7 +132,7 @@ class PlaylistManager(QObject):
 
     def _on_work_finished(self, download_id: int):
         self.item_finished.emit(download_id)
-        del self._workers[download_id]
+        self._workers.pop(download_id, None)  # Si no existe no da error
 
         # Revisamos si hay una playlist asiciada a la descarga
         playlist_id = self._db.get_playlist_id(download_id)

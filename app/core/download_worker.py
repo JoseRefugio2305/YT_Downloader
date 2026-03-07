@@ -38,6 +38,15 @@ class DownloadWorker(QThread):
         try:
             if self._cancelled:
                 raise Exception("Descarga Cancelada")
+
+            # Mapeamos los status de yt-dlp a los nuestros
+            status_map = {
+                "downloading": "downloading",
+                "finished": "downloading",  # fragmento terminado, aun no es completed
+                "error": "failed",
+            }
+            status = status_map.get(data.get("status", ""), "downloading")
+
             total = data.get("total_bytes") or data.get("total_bytes_estimate") or 0
             if total:
                 porcentaje = int(data["downloaded_bytes"] * 100 / total)
@@ -46,12 +55,12 @@ class DownloadWorker(QThread):
                 self.speed.emit(f"{format_file_size(data['speed'])}/s")
             if data.get("eta"):
                 self.eta.emit(format_duration(data["eta"]))
-            self.status_changed.emit(data["status"])
+            self.status_changed.emit(status)
         except Exception as e:
             self.error.emit("Error al descargar.")
-            self.finished.emit(self.download_id)
             self.status_changed.emit("failed")
             print(str(e))
+            raise  # Relanzamos la excepcion para que run( ) la tome y el emita el finished
 
     def cancel(self):
         self._cancelled = True

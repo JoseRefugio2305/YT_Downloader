@@ -1,8 +1,11 @@
 from yt_dlp import YoutubeDL
 from typing import List
+from pathlib import Path
 
 
 class Downloader:
+    FFMPEG_DIR = Path(__file__).parent.parent.parent / "ffmpeg" / "bin"
+
     def __init__(self, destination: str, format: str, progress_callback=None):
         callback = progress_callback if progress_callback else self._progress_hook
         self.yt_opts = self._build_opts(
@@ -60,6 +63,7 @@ class Downloader:
             "concurrent_fragment_downloads": 3,
             "continuedl": True,
             "progress_hooks": [progress_callback],
+            "js_runtimes": {"node": {}},
         }
         if format == "mp3":
 
@@ -67,13 +71,6 @@ class Downloader:
                 {
                     "format": "bestaudio",
                     "extractaudio": True,
-                    "postprocessors": [
-                        {
-                            "key": "FFmpegExtractAudio",
-                            "preferredcodec": "mp3",
-                            "preferredquality": "0",
-                        }
-                    ],
                     "audioformat": "mp3",
                     "audioquality": "0",
                     "embedthumbnail": True,
@@ -84,17 +81,20 @@ class Downloader:
         else:
             opts.update(
                 {
-                    "format": "bv*[height<=1080]+ba/b",
+                    "ffmpeg_location": str(self.FFMPEG_DIR),
+                    "format": "bv*[height<=1080]+ba/b",#TODO: Tomar las configuraciones de audio y video de settings
                     "merge_output_format": "mp4",
                 }
             )
         return opts
 
     def _info_to_dict(self, info: dict) -> dict:
+        url = info.get("webpage_url") or info.get("url")
+        miniatura = info.get("thumbnails")
         return {
             "id": info["id"],
-            "url": info["webpage_url"],
-            "channel": info["channel"],
+            "url": url,
+            "channel": info.get("webpage_url", ""),
             "title": info["title"],
-            "miniatura": info["thumbnails"][0],
+            "miniatura": miniatura[0] if miniatura else [],
         }

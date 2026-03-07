@@ -1,9 +1,15 @@
-from PySide6.QtWidgets import QMainWindow, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QMessageBox, QApplication
 from PySide6.QtGui import QCloseEvent
 
 from .resources.main_ui import UIMainWindow
+from ..ui.resources.settings_dialog import SettingsDialog
+from ..ui.resources.download_queue import DownloadQueue
+from ..ui.resources.history_panel import HistoryPanel
+from ..ui.resources.loading_dialog import LoadingDialog
 from ..database.db_manager import DBManager
 from ..core.playlist_manager import PlaylistManager
+from ..core.extract_worker import ExtractInfoWorker
+from ..utils.url_validator import is_valid_youtube_url, detect_url_type
 
 
 class MainWindow(QMainWindow):
@@ -11,8 +17,15 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.ui = UIMainWindow()
         self.ui.setupUi(self)
+        self.ui.btnDownload.clicked.connect(self._on_download_clicked)
+        self.ui.btn_settings.clicked.connect(self._open_settings)
+        self.ui.btnPasteLink.clicked.connect(self._on_paste_clicked)
+        self._settings = SettingsDialog(self)
         self._db = DBManager()
         self._manager = PlaylistManager(self._db)
+        self._queue = DownloadQueue(self.ui.scrollDownloads, self._manager, self._db)
+        self._history = HistoryPanel(self.ui.tableHistorial, self._queue, self._db)
+        self._extract_worker = None
         self._connect_signals()
 
     def _connect_signals(self):
@@ -21,6 +34,83 @@ class MainWindow(QMainWindow):
 
     def _on_all_finished(self):
         self.ui.lblInfo.setText("Descargas Finalizadas")
+        self._history.refresh()
+
+    def _on_download_clicked(self):
+        url = self.ui.inputLink.text().strip()
+        format = self.ui.comboBox.currentText().lower()  # 'mp3' o 'mp4'
+
+        if not is_valid_youtube_url(url):
+            self._show_dialog_error("El link no es un link de Youtube valido.")
+            return
+
+        type_url = detect_url_type(url)
+
+        if type_url == "video/playlist":
+            is_video_sel = self._show_dialog_type_download()
+            type_url = "video" if is_video_sel else "playlist"
+
+        self._extract_worker = ExtractInfoWorker(url, type_url, format)
+        # Activamos dialog de carga
+        self._loading = LoadingDialog(
+            "Obteniendo información, espera un momento...", self
+        )
+        # Conectamos a funciones para cerrar dialogo
+        self._extract_worker.finished.connect(self._loading.accept)
+        self._extract_worker.error.connect(self._loading.reject)
+        # Conectamos a funcioens para revisar la infor o el error
+        self._extract_worker.finished.connect(self._on_info_extracted)
+        self._extract_worker.error.connect(self._on_extract_error)
+        self._extract_worker.start()  # Iiniciamos el extract info
+        self._loading.exec()
+
+    def _on_info_extracted(self, videos: list):
+        destination = self._settings.get_destination()
+        format = self.ui.comboBox.currentText().lower()  # 'mp3' o 'mp4'
+
+        if len(videos) == 0:
+            self._show_dialog_error(
+                "Ocurrió un error al intentar obtener la información de la plalist"
+            )
+        elif len(videos) == 1 and not videos[0]:
+            self._show_dialog_error(
+                "Ocurrió un error al intentar obtener la información del video"
+            )
+
+        for video in videos:
+            new_download_id = self._manager.enqueue(
+                video["url"], format, destination, video["id"]
+            )  # TODO: Revisar como obtener la demas informacion de la playlist
+            self._queue.add_item(new_download_id, video["title"])
+
+    def _on_extract_error(self, error: str):
+        self._show_dialog_error(f"Error al obtener información: {error}")
+
+    def _show_dialog_error(self, message: str):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Warning)
+        msg.setText(message)
+        msg.setWindowTitle("Mensaje")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec()
+
+    def _show_dialog_type_download(self) -> bool:  # Video True, playlist False
+        reply = QMessageBox.question(
+            self,
+            "URL de Playlist Detectada",
+            "El link que agregaste es de un video extraído desde una playlist ¿Quieres descargar ese video (Aceptar) o la playlist completa(Cancelar)?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+
+        return reply == QMessageBox.Yes
+
+    def _open_settings(self):
+        self._settings.exec()
+
+    def _on_paste_clicked(self):
+        clipboard = QApplication.clipboard()
+        self.ui.inputLink.setText(clipboard.text().strip())
 
     def closeEvent(self, event: QCloseEvent):
         reply = QMessageBox.question(

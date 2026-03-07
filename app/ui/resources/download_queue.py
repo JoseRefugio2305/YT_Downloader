@@ -77,10 +77,16 @@ class DownloadQueue(QObject):
         scroll_area.setWidget(self.container)
 
     def add_item(self, download_id: int, title: str) -> None:
-        new_item = DownloadItem(download_id, title, self)
-        new_item.cancel_requested.connect(self._on_cancel_requested(download_id))
-        new_item.retry_requested.connect(self._on_retry_requested(download_id))
-        new_item.remove_requested.connect(self._on_remove_requested(download_id))
+        new_item = DownloadItem(download_id, title, self.container)
+        new_item.cancel_requested.connect(
+            lambda download_id: self._on_cancel_requested(download_id)
+        )
+        new_item.retry_requested.connect(
+            lambda download_id: self._on_retry_requested(download_id)
+        )
+        new_item.remove_requested.connect(
+            lambda download_id: self._on_remove_requested(download_id)
+        )
 
         self._items[download_id] = new_item
         self.layoutVItems.addWidget(new_item)

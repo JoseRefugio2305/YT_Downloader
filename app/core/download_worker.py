@@ -42,8 +42,10 @@ class DownloadWorker(QThread):
             if total:
                 porcentaje = int(data["downloaded_bytes"] * 100 / total)
                 self.progress.emit(porcentaje)
-            self.speed.emit(f"{format_file_size(data["speed"])}/s")
-            self.eta.emit(format_duration(data["eta"]))
+            if data.get("speed"):
+                self.speed.emit(f"{format_file_size(data['speed'])}/s")
+            if data.get("eta"):
+                self.eta.emit(format_duration(data["eta"]))
             self.status_changed.emit(data["status"])
         except Exception as e:
             self.error.emit("Error al descargar.")

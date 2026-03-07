@@ -75,14 +75,14 @@ class DownloadItem(QWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setSizePolicy(sizePolicy)
-        self.setMinimumSize(QSize(700, 650))
-        self.setMaximumSize(QSize(700, 650))
+        self.setMinimumSize(QSize(400, 90))
+        self.setMaximumSize(QSize(16777215, 90))
 
         # Vertical Layout Principal
         self.verticalPrincLW = QWidget(self)
         self.verticalPrincLW.setObjectName("verticalPrincLW")
         self.verticalPrincLW.setGeometry(QRect(0, 0, 680, 90))
-        self.verticalPrincL = QVBoxLayout(self.verticalPrincLW)
+        self.verticalPrincL = QVBoxLayout(self)
         self.verticalPrincL.setObjectName("verticalPrincL")
         self.verticalPrincL.setContentsMargins(5, 5, 5, 5)
         # Encabezado titulo video y Boton Cancelar/Reintentar

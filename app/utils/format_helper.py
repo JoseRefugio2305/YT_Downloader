@@ -11,7 +11,9 @@ def format_duration(segundos_t: int) -> str:
     minutos, segundos = divmod(
         resto, 60
     )  # Obtenemos los minutos y los segundos restantes
-    return f"{horas:02}:{minutos:02}:{segundos:02}"
+    if horas > 0:
+        return f"{horas:02}:{minutos:02}:{segundos:02}"
+    return f"{minutos}:{segundos:02}"
 
 
 def format_file_size(bytes: int) -> str:

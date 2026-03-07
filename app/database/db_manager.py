@@ -9,6 +9,9 @@ from app.database.models import Download, PlaylistDownload
 class DBManager:
     def __init__(self, db_path: str = "data/downloads.db"):
         self.db_path = Path(db_path)
+        self.db_path.parent.mkdir(
+            parents=True, exist_ok=True
+        )  # Creamos directorio de base de datos si no existe
         self._connection: Optional[sqlite3.Connection] = None
         self._initialize()
 

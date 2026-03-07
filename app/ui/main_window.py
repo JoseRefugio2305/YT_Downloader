@@ -46,6 +46,10 @@ class MainWindow(QMainWindow):
 
         type_url = detect_url_type(url)
 
+        if type_url == "unknown":
+            self._show_dialog_error("No se pudo determinar el tipo de URL.")
+            return
+
         if type_url == "video/playlist":
             is_video_sel = self._show_dialog_type_download()
             type_url = "video" if is_video_sel else "playlist"

@@ -1,5 +1,5 @@
 from yt_dlp import YoutubeDL
-from typing import List
+from typing import List, Optional, Tuple
 from pathlib import Path
 
 
@@ -34,17 +34,18 @@ class Downloader:
                 print(str(e))
                 return None
 
-    def extract_playlist_info(self, url: str) -> List[dict]:
+    def extract_playlist_info(self, url: str) -> Tuple[Optional[dict], List[dict]]:
         with YoutubeDL(self.yt_dlp_info) as ytdl:
             try:
                 info = ytdl.extract_info(url, download=False)
                 data = []
+                playlist_data = self._info_playlist_to_dict(info)
                 for entry in info["entries"]:
                     data.append(self._info_to_dict(entry))
-                return data
+                return playlist_data, data
             except Exception as e:
                 print(str(e))
-                return []
+                return None, []
 
     def download(self, url: str):  # Descarga del archivo
         print(f"[Downloader] Llamando yt-dlp con URL: {url}")
@@ -53,6 +54,7 @@ class Downloader:
                 result = ytdlp.download([url])
             except Exception as e:
                 import traceback
+
                 traceback.print_exc()
                 raise
 
@@ -121,4 +123,13 @@ class Downloader:
             "channel": info.get("webpage_url", ""),
             "title": info["title"],
             "miniatura": miniatura[0] if miniatura else [],
+        }
+
+    def _info_playlist_to_dict(self, info: dict) -> dict:
+        url = info.get("webpage_url") or info.get("url") or info.get("original_url")
+        return {
+            "id": info["id"],
+            "url": url,
+            "title": info["title"],
+            "playlist_count": info["playlist_count"],
         }

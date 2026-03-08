@@ -21,6 +21,7 @@ class PlaylistManager(QObject):
 
     def enqueue(
         self,
+        title,
         url,
         format,
         destination,
@@ -34,8 +35,8 @@ class PlaylistManager(QObject):
         # Si hay un id de playlist, revisamos en DB si ya existe, de no ser asi, la insertamos
         playlist_id = None
         if yt_playlist_id:
-            playlist_id = self._db.get_playlist_by_yt_id(yt_playlist_id)
-            if not playlist_id:
+            playlist = self._db.get_playlist_by_yt_id(yt_playlist_id)
+            if not playlist:
                 playlist_id = self._db.insert_playlist(
                     PlaylistDownload(
                         url=playlist_url,
@@ -47,11 +48,13 @@ class PlaylistManager(QObject):
                         total_items=playlist_t_items,
                     )
                 )
+            else:
+                playlist_id = playlist.id
 
         download_id = self._db.insert_download(
             Download(
                 url=url,
-                title="",
+                title=title,
                 format=format,
                 status="pending",
                 destination_path=destination,
@@ -71,7 +74,7 @@ class PlaylistManager(QObject):
             }
         )
         return download_id
-    
+
     def start_enqueue(self):
         self._start_next()  # Iniciamos la descarga
 

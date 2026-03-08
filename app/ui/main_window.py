@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QApplication
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCloseEvent
+from typing import Optional
 
 from .resources.main_ui import UIMainWindow
 from ..ui.resources.settings_dialog import SettingsDialog
@@ -71,7 +72,7 @@ class MainWindow(QMainWindow):
         )  # Despues de 100 mls ejecutamos extractworker para dar tiempo a que se muestre el dialog de carga
         self._loading.exec()
 
-    def _on_info_extracted(self, videos: list):
+    def _on_info_extracted(self, playlist_info: Optional[dict], videos: list):
         destination = self._settings.get_destination()
         format = self.ui.comboBox.currentText().lower()  # 'mp3' o 'mp4'
 
@@ -85,9 +86,22 @@ class MainWindow(QMainWindow):
             )
 
         for video in videos:
-            new_download_id = self._manager.enqueue(
-                video["url"], format, destination, video["id"]
-            )  # TODO: Revisar como obtener la demas informacion de la playlist
+            if playlist_info:
+                new_download_id = self._manager.enqueue(
+                    video["title"],
+                    video["url"],
+                    format,
+                    destination,
+                    video["id"],
+                    playlist_info["id"],
+                    playlist_info["url"],
+                    playlist_info["title"],
+                    playlist_info["playlist_count"],
+                )
+            else:
+                new_download_id = self._manager.enqueue(
+                    video["title"], video["url"], format, destination, video["id"]
+                )
             self._queue.add_item(new_download_id, video["title"])
 
         self._manager.start_enqueue()  # Una vez que todos los elementos fuero agregados a la lista de descargas y a la cola de descargas iniciamos las descargas en la cola

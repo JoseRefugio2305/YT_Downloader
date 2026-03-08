@@ -100,6 +100,7 @@ class DownloadQueue(QObject):
             return
 
         new_download_id = self._playlist_manager.enqueue(
+            download.title,
             download.url,
             download.format,
             download.destination_path,

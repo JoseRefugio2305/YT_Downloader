@@ -29,9 +29,15 @@ class DownloadWorker(QThread):
             if not self._cancelled:
                 self.status_changed.emit("completed")
                 self.finished.emit(self.download_id)
+            else:  # Si esta cancelado emitimos el estado
+                self.status_changed.emit("cancelled")
+                self.finished.emit(self.download_id)
         except Exception as e:
-            self.error.emit(str(e))
-            self.status_changed.emit("failed")
+            if self._cancelled:
+                self.status_changed.emit("cancelled")  # <- cancelación no es fallo
+            else:
+                self.error.emit(str(e))
+                self.status_changed.emit("failed")
             self.finished.emit(self.download_id)
 
     def _on_progress(self, data: dict):

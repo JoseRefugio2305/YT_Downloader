@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
+    <width>1000</width>
     <height>650</height>
    </rect>
   </property>
@@ -18,25 +18,25 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>700</width>
+    <width>1000</width>
     <height>650</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>700</width>
+    <width>1000</width>
     <height>650</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>YT Downloader</string>
   </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>711</width>
+     <width>1001</width>
      <height>671</height>
     </rect>
    </property>
@@ -51,7 +51,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
@@ -60,7 +60,7 @@
        <widget class="QLineEdit" name="inputLink">
         <property name="geometry">
          <rect>
-          <x>120</x>
+          <x>410</x>
           <y>50</y>
           <width>451</width>
           <height>41</height>
@@ -78,7 +78,7 @@
        <widget class="QPushButton" name="btnPasteLink">
         <property name="geometry">
          <rect>
-          <x>60</x>
+          <x>350</x>
           <y>50</y>
           <width>51</width>
           <height>41</height>
@@ -100,7 +100,7 @@
          <rect>
           <x>10</x>
           <y>220</y>
-          <width>681</width>
+          <width>981</width>
           <height>391</height>
          </rect>
         </property>
@@ -112,7 +112,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>677</width>
+           <width>977</width>
            <height>387</height>
           </rect>
          </property>
@@ -121,8 +121,8 @@
        <widget class="QPushButton" name="btnDownload">
         <property name="geometry">
          <rect>
-          <x>240</x>
-          <y>110</y>
+          <x>530</x>
+          <y>100</y>
           <width>201</width>
           <height>41</height>
          </rect>
@@ -161,15 +161,15 @@
        <widget class="QLabel" name="label">
         <property name="geometry">
          <rect>
-          <x>30</x>
+          <x>10</x>
           <y>10</y>
-          <width>621</width>
-          <height>41</height>
+          <width>331</width>
+          <height>111</height>
          </rect>
         </property>
         <property name="font">
          <font>
-          <pointsize>20</pointsize>
+          <pointsize>30</pointsize>
           <italic>false</italic>
           <bold>true</bold>
           <underline>true</underline>
@@ -185,7 +185,7 @@
        <widget class="QComboBox" name="comboBox">
         <property name="geometry">
          <rect>
-          <x>580</x>
+          <x>870</x>
           <y>50</y>
           <width>111</width>
           <height>41</height>
@@ -212,8 +212,8 @@
        <widget class="QPushButton" name="btn_settings">
         <property name="geometry">
          <rect>
-          <x>630</x>
-          <y>110</y>
+          <x>930</x>
+          <y>100</y>
           <width>51</width>
           <height>41</height>
          </rect>
@@ -239,7 +239,7 @@
          <rect>
           <x>10</x>
           <y>60</y>
-          <width>681</width>
+          <width>978</width>
           <height>551</height>
          </rect>
         </property>
@@ -247,7 +247,7 @@
        <widget class="QPushButton" name="btnLimpiarH">
         <property name="geometry">
          <rect>
-          <x>530</x>
+          <x>820</x>
           <y>10</y>
           <width>161</width>
           <height>41</height>
@@ -262,23 +262,6 @@
         </property>
         <property name="text">
          <string>Limpiar Historial</string>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="comboStatus">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>231</width>
-          <height>41</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>13</pointsize>
-          <italic>false</italic>
-          <bold>true</bold>
-         </font>
         </property>
        </widget>
       </widget>

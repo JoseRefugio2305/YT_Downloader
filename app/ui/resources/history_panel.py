@@ -79,21 +79,28 @@ class HistoryPanel(QObject):
         self._table.setFont(font)
         self._table.setColumnCount(6)
         self._table.verticalHeader().setDefaultSectionSize(100)
+        self._table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self._table.setHorizontalHeaderLabels(
             ["Título", "Formato", "Estado", "Fecha", "Ruta", "Acciones"]
         )
 
     def _add_action_buttons(self, row: int, download: Download):
+        font = QFont()
+        font.setPointSize(13)
+        font.setBold(True)
+        font.setItalic(False)
         widget = QWidget()
         layout = QVBoxLayout(widget)
         label = QLabel("No disponibles durante descarga")
         btn_retry = QPushButton()
         btn_retry.setText("Reintentar")
         btn_retry.setStyleSheet("background-color : #FC8A00; color : white;")
-        btn_retry.clicked.connect(lambda: self._on_retry( download))
+        btn_retry.setFont(font)
+        btn_retry.clicked.connect(lambda: self._on_retry(download))
         btn_delete = QPushButton()
         btn_delete.setText("Eliminar")
         btn_delete.setStyleSheet("background-color : #E01616; color : white;")
+        btn_delete.setFont(font)
         btn_delete.clicked.connect(lambda: self._on_delete_from_history(row, download))
         layout.addWidget(btn_retry)
         layout.addWidget(btn_delete)
@@ -122,20 +129,24 @@ class HistoryPanel(QObject):
         )
         self._add_action_buttons(row, download)
         if download.playlist_id:
-            color = QColor("#7CCFE6")  # tono distinto para items de playlist
+            color = QColor("#A9ECFF")  # tono distinto para items de playlist
         else:
-            color = QColor("#E0B753")  # color normal para videos sueltos
-
+            color = QColor("#FFE5A3")  # color normal para videos sueltos
+        font = QFont()
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setItalic(False)
         for col in range(self._table.columnCount()):
             item = self._table.item(row, col)
             if item:
-                item.setBackground(color)
-                if (
-                    col == self.COL_STATUS
-                ):  # Si es la columna del status, le damos tambien un color de texto dependiendo del estado
-                    item.setForeground(
-                        QColor(get_status_color(download.status.capitalize()))
-                    )
+                item.setTextAlignment(Qt.AlignCenter)
+                # Si es la columna del status, le damos tambien un color de texto dependiendo del estado
+                if col == self.COL_STATUS:
+                    item.setForeground(QColor(get_status_color(download.status)))
+                    item.setFont(font)
+                else:
+                    item.setForeground(QColor("#000000"))
+                    item.setBackground(color)
 
     def _load_history(self):
         history = self._db.get_downloads()
@@ -159,7 +170,7 @@ class HistoryPanel(QObject):
         self._table.removeRow(row)
 
     def _on_retry(self, download: Download):
-        self._queue.add_item(download.id,download.title)
+        self._queue.add_item(download.id, download.title)
         self._queue._on_retry_requested(download.id)
         self.refresh()
 

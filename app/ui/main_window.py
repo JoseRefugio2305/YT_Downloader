@@ -68,8 +68,9 @@ class MainWindow(QMainWindow):
         self._extract_worker.finished.connect(self._on_info_extracted)
         self._extract_worker.error.connect(self._on_extract_error)
         QTimer.singleShot(
-            100, self._extract_worker.start
+            500, self._extract_worker.start
         )  # Despues de 100 mls ejecutamos extractworker para dar tiempo a que se muestre el dialog de carga
+        self._loading.show()
         self._loading.exec()
 
     def _on_info_extracted(self, playlist_info: Optional[dict], videos: list):

@@ -47,8 +47,14 @@ class Downloader:
                 return []
 
     def download(self, url: str):  # Descarga del archivo
+        print(f"[Downloader] Llamando yt-dlp con URL: {url}")
         with YoutubeDL(self.yt_opts) as ytdlp:
-            ytdlp.download(url)
+            try:
+                result = ytdlp.download([url])
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                raise
 
     def _progress_hook(self, data: dict):
         print(data)
@@ -64,25 +70,43 @@ class Downloader:
             "continuedl": True,
             "progress_hooks": [progress_callback],
             "js_runtimes": {"node": {}},
+            "quiet": False,
+            "verbose": True,
+            "no_warnings": False,
+            "postprocessor_hooks": [
+                lambda d: print(
+                    f"[PP Hook] status={d.get('status')} pp={d.get('postprocessor')}"
+                )
+            ],
         }
         if format == "mp3":
 
             opts.update(
                 {
-                    "format": "bestaudio",
-                    "extractaudio": True,
-                    "audioformat": "mp3",
-                    "audioquality": "0",
-                    "embedthumbnail": True,
+                    "format": "bestaudio/best",
+                    "ffmpeg_location": str(self.FFMPEG_DIR),
+                    "writethumbnail": True,
                     "convert_thumbnails": "jpg",
-                    "addmetadata": True,
+                    "postprocessors": [
+                        {
+                            "key": "FFmpegExtractAudio",
+                            "preferredcodec": "mp3",
+                            "preferredquality": "0",
+                        },
+                        {
+                            "key": "FFmpegMetadata",  # embebe metadatos ID3
+                        },
+                        {
+                            "key": "EmbedThumbnail",  # embebe la caratula
+                        },
+                    ],
                 }
             )
         else:
             opts.update(
                 {
                     "ffmpeg_location": str(self.FFMPEG_DIR),
-                    "format": "bv*[height<=1080]+ba/b",#TODO: Tomar las configuraciones de audio y video de settings
+                    "format": "bv*[height<=1080]+ba/b",  # TODO: Tomar las configuraciones de audio y video de settings
                     "merge_output_format": "mp4",
                 }
             )

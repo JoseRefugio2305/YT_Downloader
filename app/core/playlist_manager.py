@@ -70,9 +70,10 @@ class PlaylistManager(QObject):
                 "status": "pending",
             }
         )
-        self._start_next()  # Una vez encolado, iniciamos el siguiente
-
         return download_id
+    
+    def start_enqueue(self):
+        self._start_next()  # Iniciamos la descarga
 
     def cancel_item(self, download_id: int) -> None:
         if (

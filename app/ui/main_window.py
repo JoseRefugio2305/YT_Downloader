@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QApplication
+from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCloseEvent
 
 from .resources.main_ui import UIMainWindow
@@ -65,7 +66,9 @@ class MainWindow(QMainWindow):
         # Conectamos a funcioens para revisar la infor o el error
         self._extract_worker.finished.connect(self._on_info_extracted)
         self._extract_worker.error.connect(self._on_extract_error)
-        self._extract_worker.start()  # Iiniciamos el extract info
+        QTimer.singleShot(
+            100, self._extract_worker.start
+        )  # Despues de 100 mls ejecutamos extractworker para dar tiempo a que se muestre el dialog de carga
         self._loading.exec()
 
     def _on_info_extracted(self, videos: list):
@@ -86,6 +89,8 @@ class MainWindow(QMainWindow):
                 video["url"], format, destination, video["id"]
             )  # TODO: Revisar como obtener la demas informacion de la playlist
             self._queue.add_item(new_download_id, video["title"])
+
+        self._manager.start_enqueue()  # Una vez que todos los elementos fuero agregados a la lista de descargas y a la cola de descargas iniciamos las descargas en la cola
 
     def _on_extract_error(self, error: str):
         self._show_dialog_error(f"Error al obtener información: {error}")

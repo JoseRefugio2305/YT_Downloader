@@ -114,6 +114,8 @@ class DownloadQueue(QObject):
         item._download_id = new_download_id  # actualizamos su id
         self._items[new_download_id] = item
 
+        self._playlist_manager.start_enqueue()
+
     def _on_remove_requested(self, download_id: int):
         item = self._items.pop(download_id)
         self.layoutVItems.removeWidget(item)

@@ -72,7 +72,13 @@ class HistoryPanel(QObject):
         self._load_history()
 
     def _setup_table(self):
+        font = QFont()
+        font.setPointSize(12)
+        font.setBold(False)
+        font.setItalic(False)
+        self._table.setFont(font)
         self._table.setColumnCount(6)
+        self._table.verticalHeader().setDefaultSectionSize(100)
         self._table.setHorizontalHeaderLabels(
             ["Título", "Formato", "Estado", "Fecha", "Ruta", "Acciones"]
         )
@@ -81,8 +87,13 @@ class HistoryPanel(QObject):
         widget = QWidget()
         layout = QVBoxLayout(widget)
         label = QLabel("No disponibles durante descarga")
-        btn_retry = QPushButton("Reintentar")
-        btn_delete = QPushButton("Eliminar")
+        btn_retry = QPushButton()
+        btn_retry.setText("Reintentar")
+        btn_retry.setStyleSheet("background-color : #FC8A00; color : white;")
+        btn_retry.clicked.connect(lambda: self._on_retry( download))
+        btn_delete = QPushButton()
+        btn_delete.setText("Eliminar")
+        btn_delete.setStyleSheet("background-color : #E01616; color : white;")
         btn_delete.clicked.connect(lambda: self._on_delete_from_history(row, download))
         layout.addWidget(btn_retry)
         layout.addWidget(btn_delete)
@@ -148,6 +159,7 @@ class HistoryPanel(QObject):
         self._table.removeRow(row)
 
     def _on_retry(self, download: Download):
+        self._queue.add_item(download.id,download.title)
         self._queue._on_retry_requested(download.id)
         self.refresh()
 

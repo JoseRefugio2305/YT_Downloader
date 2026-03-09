@@ -257,6 +257,11 @@ class DBManager:
             # Por la configuracion, cuando se elimine una playlist todos los videos en downloads que esten asociados a ella quedaran con playlist_id en NULL
             conn.execute("DELETE FROM playlist_downloads WHERE id = ?", (playlist_id,))
 
+    def delete_historial(self):
+        with self._connect() as conn:
+            conn.execute("DELETE FROM downloads WHERE id >=1")
+            conn.execute("DELETE FROM playlist_downloads WHERE id >=1")
+
     @staticmethod
     def _row_to_download(row: sqlite3.Row) -> Download:
         return Download(

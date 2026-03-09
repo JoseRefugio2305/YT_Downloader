@@ -26,7 +26,9 @@ class MainWindow(QMainWindow):
         self._db = DBManager()
         self._manager = PlaylistManager(self._db)
         self._queue = DownloadQueue(self.ui.scrollDownloads, self._manager, self._db)
-        self._history = HistoryPanel(self.ui.tableHistorial, self._queue, self._db)
+        self._history = HistoryPanel(
+            self.ui.tableHistorial, self.ui.btnLimpiarH, self._queue, self._db
+        )
         self._extract_worker = None
         self._connect_signals()
 

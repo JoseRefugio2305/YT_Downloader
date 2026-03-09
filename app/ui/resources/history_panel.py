@@ -57,9 +57,17 @@ from ...utils.text_helpers import get_status_color
 
 
 class HistoryPanel(QObject):
-    def __init__(self, table: QTableWidget, queue: DownloadQueue, db: DBManager):
+    def __init__(
+        self,
+        table: QTableWidget,
+        delete_all_btn: QPushButton,
+        queue: DownloadQueue,
+        db: DBManager,
+    ):
         super().__init__()
         self._table = table
+        self._delete_all_btn = delete_all_btn
+        self._delete_all_btn.clicked.connect(self._on_delete_all_history)
         self._queue = queue
         self._db = db
         self.COL_TITLE = 0
@@ -168,6 +176,20 @@ class HistoryPanel(QObject):
 
         self._db.delete_download(doanload.id)
         self._table.removeRow(row)
+
+    def _on_delete_all_history(self):
+        reply = QMessageBox.question(
+            self._table,
+            "Confirmar eliminación",
+            f"¿Estás seguro de querer eliminar todo el historial de descargas?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
+        )
+        if reply == QMessageBox.No:
+            return
+
+        self._db.delete_historial()
+        self.refresh()
 
     def _on_retry(self, download: Download):
         self._queue.add_item(download.id, download.title)

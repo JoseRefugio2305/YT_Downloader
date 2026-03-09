@@ -4,11 +4,11 @@ def get_status_color(status: str) -> str:
         case "downloading":
             color = "#3B82F6"
         case "completed":
-            color = "#00FF42"
+            color = "#2C9F4B"
         case "failed":
             color = "#EF4444"
         case "cancelled":
             color = "#F59E0B"
         case _:  # pending actua como default
-            color = "#9CA3AF"
+            color = "#000000"
     return color

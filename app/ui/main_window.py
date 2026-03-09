@@ -37,7 +37,6 @@ class MainWindow(QMainWindow):
         self._manager.all_finished.connect(self._on_all_finished)
 
     def _on_all_finished(self):
-        self.ui.lblInfo.setText("Descargas Finalizadas")
         self._history.refresh()
 
     def _on_download_clicked(self):

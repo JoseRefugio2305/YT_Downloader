@@ -70,7 +70,7 @@ class DownloadWorker(QThread):
 
             total = data.get("total_bytes") or data.get("total_bytes_estimate") or 0
             if total:
-                porcentaje = int(data["downloaded_bytes"] * 100 / total)
+                porcentaje = int(data.get("downloaded_bytes",1000) * 100 / total)
                 self.progress.emit(porcentaje)
             if data.get("speed"):
                 self.speed.emit(f"{format_file_size(data['speed'])}/s")

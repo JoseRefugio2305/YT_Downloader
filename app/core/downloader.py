@@ -95,7 +95,9 @@ class Downloader:
             ],
             "extractor_args": {
                 "youtube": {
-                    "player_client": ["tv_embedded"],  # usa clientes alternativos
+                    "player_client": [
+                        "tv_embedded",
+                    ],  # usa clientes alternativos , "web", "android", "tv_embedded"
                 }
             },
         }
@@ -137,18 +139,18 @@ class Downloader:
         url = info.get("webpage_url") or info.get("url")
         miniatura = info.get("thumbnails")
         return {
-            "id": info["id"],
+            "id": info.get("id", ""),
             "url": url,
             "channel": info.get("webpage_url", ""),
-            "title": info["title"],
-            "miniatura": miniatura[0] if miniatura else [],
+            "title": info.get("title", ""),
+            "miniatura": miniatura[0] if miniatura and len(miniatura) > 0 else [],
         }
 
     def _info_playlist_to_dict(self, info: dict) -> dict:
         url = info.get("webpage_url") or info.get("url") or info.get("original_url")
         return {
-            "id": info["id"],
+            "id": info.get("id", ""),
             "url": url,
-            "title": info["title"],
-            "playlist_count": info["playlist_count"],
+            "title": info.get("title", ""),
+            "playlist_count": info.get("playlist_count", 0),
         }

@@ -95,12 +95,16 @@ class Downloader:
             ],
             "extractor_args": {
                 "youtube": {
-                    "player_client": [
-                        "tv_embedded",
-                    ],  # usa clientes alternativos , "web", "android", "tv_embedded"
+                    "player_client": Settings.get_player_client()  # [ "tv_embedded",],  # usa clientes alternativos , "web", "android", "tv_embedded"
                 }
             },
         }
+
+        # Agregamos ratelimit
+        speed_limit = Settings.get_speed_limit()
+        if speed_limit:
+            opts["ratelimit"] = speed_limit
+
         if format == "mp3":
             opts.update(
                 {

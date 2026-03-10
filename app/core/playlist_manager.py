@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, Signal, QTimer
 
 from .download_worker import DownloadWorker
 from ..database.db_manager import DBManager
@@ -159,4 +159,9 @@ class PlaylistManager(QObject):
                 final_status = "completed" if failures == 0 else "partial"
                 self._db.update_playlist_status(playlist_id, final_status)
 
-        self._start_next()  # Revisamos si hay algun otro elemento en la cola
+        # Revisamos primero si hay delay aplicado, de haberlo se aplica antes de llamar a la seguiente descarga
+        delay_ms = Settings.get_download_delay() * 1000
+        if delay_ms > 0:
+            QTimer.singleShot(delay_ms, self._start_next)
+        else:
+            self._start_next()  # Revisamos si hay algun otro elemento en la cola

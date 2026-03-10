@@ -67,6 +67,7 @@ class SettingsDialog(QDialog):
 
     def _setup_ui(self):
         self.setWindowTitle("Configuraciones")
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.MSWindowsFixedSizeDialogHint)
         self.layoutPrinc = QVBoxLayout()  # Layout General
         font1 = QFont()
         font1.setPointSize(20)
@@ -123,9 +124,9 @@ class SettingsDialog(QDialog):
         self.combo_vid_qual.setFont(font2)
         self.combo_vid_qual.addItem("Mejor Calidad", "bestvideo+bestaudio/best")
         self.combo_vid_qual.addItem("1080p", "bestvideo[height<=1080]+bestaudio/best")
-        self.combo_vid_qual.addItem("720p",  "bestvideo[height<=720]+bestaudio/best")
-        self.combo_vid_qual.addItem("480p",  "bestvideo[height<=480]+bestaudio/best")
-        self.combo_vid_qual.addItem("360p",  "bestvideo[height<=360]+bestaudio/best")
+        self.combo_vid_qual.addItem("720p", "bestvideo[height<=720]+bestaudio/best")
+        self.combo_vid_qual.addItem("480p", "bestvideo[height<=480]+bestaudio/best")
+        self.combo_vid_qual.addItem("360p", "bestvideo[height<=360]+bestaudio/best")
         self.horizontalVQualL.addWidget(self.lbl_vid_qual)
         self.horizontalVQualL.addWidget(self.combo_vid_qual)
         # Calidad de Audio
@@ -144,6 +145,48 @@ class SettingsDialog(QDialog):
         self.combo_aud_qual.addItem("Baja", "7")
         self.horizontalAudioQualL.addWidget(self.lbl_audio_qual)
         self.horizontalAudioQualL.addWidget(self.combo_aud_qual)
+
+        # Límite de velocidad
+        self.horizontalSpeedL = QHBoxLayout()
+        self.lbl_speed = QLabel("Límite de velocidad: ")
+        self.lbl_speed.setFont(font2)
+        self.combo_speed = QComboBox()
+        self.combo_speed.setFont(font2)
+        self.combo_speed.addItem("Sin límite", None)
+        self.combo_speed.addItem("512 KB/s", 512000)
+        self.combo_speed.addItem("1 MB/s", 1024000)
+        self.combo_speed.addItem("2 MB/s", 2048000)
+        self.combo_speed.addItem("5 MB/s", 5120000)
+        self.horizontalSpeedL.addWidget(self.lbl_speed)
+        self.horizontalSpeedL.addWidget(self.combo_speed)
+        self.layoutPrinc.addLayout(self.horizontalSpeedL)
+
+        # Delay entre descargas
+        self.horizontalDelayL = QHBoxLayout()
+        self.lbl_delay = QLabel("Espera entre descargas (seg): ")
+        self.lbl_delay.setFont(font2)
+        self.spin_delay = QSpinBox()
+        self.spin_delay.setFont(font2)
+        self.spin_delay.setRange(0, 60)
+        self.spin_delay.setValue(Settings.get_download_delay())
+        self.horizontalDelayL.addWidget(self.lbl_delay)
+        self.horizontalDelayL.addWidget(self.spin_delay)
+        self.layoutPrinc.addLayout(self.horizontalDelayL)
+
+        # Límite de velocidad
+        self.horizontalClientL = QHBoxLayout()
+        self.lbl_client = QLabel("Cliente (Player Client): ")
+        self.lbl_client.setFont(font2)
+        self.combo_player_client = QComboBox()
+        self.combo_player_client.setFont(font2)
+        self.combo_player_client.addItem(
+            "TV (Mejor calidad de descarga)", ["tv_embedded"]
+        )
+        self.combo_player_client.addItem("Web/Android", ["web", "android"])
+        self.combo_player_client.addItem("Todos", ["tv_embedded" "web", "android"])
+        self.horizontalClientL.addWidget(self.lbl_client)
+        self.horizontalClientL.addWidget(self.combo_player_client)
+        self.layoutPrinc.addLayout(self.horizontalClientL)
 
         # Botones Aplicar/Cancelar
         self.horizontalBtnFooterL = QHBoxLayout()
@@ -175,6 +218,11 @@ class SettingsDialog(QDialog):
         Settings._settings.setValue("max_concurrent", self.spin_num_descargas.value())
         Settings._settings.setValue("max_vid_qual", self.combo_vid_qual.currentData())
         Settings._settings.setValue("max_aud_qual", self.combo_aud_qual.currentData())
+        Settings._settings.setValue("speed_limit", self.combo_speed.currentData())
+        Settings._settings.setValue("download_delay", self.spin_delay.value())
+        Settings._settings.setValue(
+            "player_client", self.combo_player_client.currentData()
+        )
         self.accept()
 
     def _load_settings(self):
@@ -184,9 +232,20 @@ class SettingsDialog(QDialog):
         idx = self.combo_vid_qual.findData(Settings.get_video_quality())
         if idx >= 0:
             self.combo_vid_qual.setCurrentIndex(idx)
+
         idx = self.combo_aud_qual.findData(Settings.get_audio_quality())
         if idx >= 0:
             self.combo_aud_qual.setCurrentIndex(idx)
+
+        idx = self.combo_speed.findData(Settings.get_speed_limit())
+        if idx >= 0:
+            self.combo_speed.setCurrentIndex(idx)
+
+        idx = self.combo_player_client.findData(Settings.get_player_client())
+        if idx >= 0:
+            self.combo_player_client.setCurrentIndex(idx)
+
+        self.spin_delay.setValue(Settings.get_download_delay())
 
     def _cancel_dialog(self):
         self.close()

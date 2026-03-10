@@ -163,29 +163,51 @@ class HistoryPanel(QObject):
             self._add_row(row, doanload)
 
     def _on_delete_from_history(self, row: int, doanload: Download):
-        reply = QMessageBox.question(
-            self._table,
-            "Confirmar eliminación",
-            f"¿Estás seguro de querer eliminar {doanload.title} del historial?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Icon.Question)
+        msgBox.setWindowTitle("Confirmar eliminación")
+        msgBox.setText(
+            f"¿Estás seguro de querer eliminar {doanload.title} del historial?"
+        )
+        msgBox.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
-        if reply == QMessageBox.No:
+        buttonY = msgBox.button(QMessageBox.StandardButton.Yes)
+        buttonY.setText("Borrar")
+
+        buttonN = msgBox.button(QMessageBox.StandardButton.No)
+        buttonN.setText("Cancelar")
+
+        ret = msgBox.exec()
+
+        if msgBox.clickedButton() == buttonN:
             return
 
         self._db.delete_download(doanload.id)
         self._table.removeRow(row)
 
     def _on_delete_all_history(self):
-        reply = QMessageBox.question(
-            self._table,
-            "Confirmar eliminación",
-            f"¿Estás seguro de querer eliminar todo el historial de descargas?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Icon.Question)
+        msgBox.setWindowTitle("Confirmar eliminación")
+        msgBox.setText(
+            "¿Estás seguro de querer eliminar todo el historial de descargas?"
         )
-        if reply == QMessageBox.No:
+        msgBox.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        buttonY = msgBox.button(QMessageBox.StandardButton.Yes)
+        buttonY.setText("Borrar")
+
+        buttonN = msgBox.button(QMessageBox.StandardButton.No)
+        buttonN.setText("Cancelar")
+
+        ret = msgBox.exec()
+
+        if msgBox.clickedButton() == buttonN:
             return
 
         self._db.delete_historial()

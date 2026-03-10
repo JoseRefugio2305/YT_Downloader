@@ -127,15 +127,25 @@ class MainWindow(QMainWindow):
         msg.exec()
 
     def _show_dialog_type_download(self) -> bool:  # Video True, playlist False
-        reply = QMessageBox.question(
-            self,
-            "URL de Playlist Detectada",
-            "El link que agregaste es de un video extraído desde una playlist ¿Quieres descargar ese video (Aceptar) o la playlist completa(Cancelar)?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Icon.Question)
+        msgBox.setWindowTitle("URL de Playlist Detectada")
+        msgBox.setText(
+            "El link que agregaste es de un video extraído desde una playlist ¿Quieres descargar ese video o la playlist completa?"
+        )
+        msgBox.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
-        return reply == QMessageBox.Yes
+        buttonY = msgBox.button(QMessageBox.StandardButton.Yes)
+        buttonY.setText("Descargar Video")
+
+        buttonN = msgBox.button(QMessageBox.StandardButton.No)
+        buttonN.setText("Descargar Playlist")
+
+        ret = msgBox.exec()
+        return msgBox.clickedButton() == buttonY
 
     def _open_settings(self):
         self._settings.exec()
@@ -145,15 +155,25 @@ class MainWindow(QMainWindow):
         self.ui.inputLink.setText(clipboard.text().strip())
 
     def closeEvent(self, event: QCloseEvent):
-        reply = QMessageBox.question(
-            self,
-            "Confirmar salida",
-            "¿Estás seguro de que deseas salir? Se cancelaran las descargas activas.",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No,
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Icon.Question)
+        msgBox.setWindowTitle("Confirmar salida")
+        msgBox.setText(
+            "¿Estás seguro de que deseas salir? Se cancelaran las descargas activas."
+        )
+        msgBox.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
 
-        if reply == QMessageBox.Yes:
+        buttonY = msgBox.button(QMessageBox.StandardButton.Yes)
+        buttonY.setText("Salir")
+
+        buttonN = msgBox.button(QMessageBox.StandardButton.No)
+        buttonN.setText("Cancelar")
+
+        ret = msgBox.exec()
+
+        if msgBox.clickedButton() == buttonY:
             self._manager.cancel_all()
             self._db.close()
             event.accept()  # Cierra la ventana

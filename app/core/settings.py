@@ -1,59 +1,4 @@
-from PySide6.QtCore import (
-    QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
-    QMetaObject,
-    QObject,
-    QPoint,
-    QRect,
-    QSize,
-    QTime,
-    QUrl,
-    Qt,
-    Signal,
-    QSettings,
-)
-from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
-    QFont,
-    QFontDatabase,
-    QGradient,
-    QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
-)
-from PySide6.QtWidgets import (
-    QApplication,
-    QDialog,
-    QFileDialog,
-    QComboBox,
-    QSpinBox,
-    QComboBox,
-    QHeaderView,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QScrollArea,
-    QSizePolicy,
-    QTabWidget,
-    QTableWidget,
-    QTableWidgetItem,
-    QVBoxLayout,
-    QHBoxLayout,
-    QProgressBar,
-    QWidget,
-    QMessageBox,
-)
+from PySide6.QtCore import QSettings
 from pathlib import Path
 from typing import List
 
@@ -89,10 +34,12 @@ class SettingsApp:
 
     def get_download_delay(self) -> int:
         # Segundos de espera entre descargas, 0 = sin espera
-        return self._settings.value("download_delay", 0, type=int)#Lo entrega en segundos
-    
-    def get_player_client(self)->List[str]:
-        #Valores en la lista  "web", "android", "tv_embedded"
+        return self._settings.value(
+            "download_delay", 0, type=int
+        )  # Lo entrega en segundos
+
+    def get_player_client(self) -> List[str]:
+        # Valores en la lista  "web", "android", "tv_embedded"
         return self._settings.value("player_client", ["tv_embedded"], type=list)
 
 

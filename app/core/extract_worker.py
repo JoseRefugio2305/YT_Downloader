@@ -1,5 +1,4 @@
 from PySide6.QtCore import QThread, Signal
-from typing import Optional, Any, Dict
 
 from .downloader import Downloader
 

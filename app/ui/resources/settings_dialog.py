@@ -1,60 +1,16 @@
-from PySide6.QtCore import (
-    QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
-    QMetaObject,
-    QObject,
-    QPoint,
-    QRect,
-    QSize,
-    QTime,
-    QUrl,
-    Qt,
-    Signal,
-    QSettings,
-)
-from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
-    QFont,
-    QFontDatabase,
-    QGradient,
-    QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
-)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QApplication,
     QDialog,
     QFileDialog,
     QComboBox,
     QSpinBox,
     QComboBox,
-    QHeaderView,
     QLabel,
-    QLineEdit,
     QPushButton,
-    QScrollArea,
-    QSizePolicy,
-    QTabWidget,
-    QTableWidget,
-    QTableWidgetItem,
     QVBoxLayout,
     QHBoxLayout,
-    QProgressBar,
-    QWidget,
-    QMessageBox,
 )
-from pathlib import Path
 
 from ...core.settings import Settings
 
@@ -67,7 +23,9 @@ class SettingsDialog(QDialog):
 
     def _setup_ui(self):
         self.setWindowTitle("Configuraciones")
-        self.setWindowFlags(self.windowFlags() | Qt.WindowType.MSWindowsFixedSizeDialogHint)
+        self.setWindowFlags(
+            self.windowFlags() | Qt.WindowType.MSWindowsFixedSizeDialogHint
+        )
         self.layoutPrinc = QVBoxLayout()  # Layout General
         font1 = QFont()
         font1.setPointSize(20)

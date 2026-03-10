@@ -1,56 +1,6 @@
-from PySide6.QtCore import (
-    QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
-    QMetaObject,
-    QObject,
-    QPoint,
-    QRect,
-    QSize,
-    QTime,
-    QUrl,
-    Qt,
-    Signal,
-)
-from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
-    QFont,
-    QFontDatabase,
-    QGradient,
-    QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
-    QMovie,
-)
-from PySide6.QtWidgets import (
-    QApplication,
-    QComboBox,
-    QHeaderView,
-    QLabel,
-    QLineEdit,
-    QPushButton,
-    QScrollArea,
-    QSizePolicy,
-    QTabWidget,
-    QTableWidget,
-    QTableWidgetItem,
-    QVBoxLayout,
-    QHBoxLayout,
-    QProgressBar,
-    QWidget,
-    QMessageBox,
-    QDialog,
-)
+from PySide6.QtCore import QSize, Qt
+from PySide6.QtGui import QFont, QMovie
+from PySide6.QtWidgets import QLabel, QVBoxLayout, QDialog
 from pathlib import Path
 
 

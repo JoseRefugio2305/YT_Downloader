@@ -165,11 +165,11 @@ class DownloadItem(QWidget):
         self.horizontalInfoL.addWidget(self.lblStatus)
 
         # Layout vertical de botones
-        self.verticalBtnActionsL = QVBoxLayout()
-        self.verticalBtnActionsL.setObjectName("verticalBtnActionsL")
-        self.verticalBtnActionsL.setGeometry(QRect(0, 0, 950, 30))
-        self.verticalBtnActionsL.setContentsMargins(30, 0, 30, 0)
-        self.horizontalInfoBtnL.addLayout(self.verticalBtnActionsL)
+        self.horizontalBtnActionsL = QHBoxLayout()
+        self.horizontalBtnActionsL.setObjectName("horizontalBtnActionsL")
+        self.horizontalBtnActionsL.setGeometry(QRect(0, 0, 950, 30))
+        self.horizontalBtnActionsL.setContentsMargins(30, 0, 30, 0)
+        self.horizontalInfoBtnL.addLayout(self.horizontalBtnActionsL)
 
         # Boton Cancelar
         self.btnCancel = QPushButton()
@@ -182,7 +182,7 @@ class DownloadItem(QWidget):
         self.btnCancel.clicked.connect(
             lambda: self.cancel_requested.emit(self._download_id)
         )
-        self.verticalBtnActionsL.addWidget(self.btnCancel)
+        self.horizontalBtnActionsL.addWidget(self.btnCancel)
         # Boton de Reintentar
         self.btnRetry = QPushButton()
         self.btnRetry.setObjectName("btnRetry")
@@ -195,7 +195,7 @@ class DownloadItem(QWidget):
         self.btnRetry.clicked.connect(
             lambda: self.retry_requested.emit(self._download_id)
         )
-        self.verticalBtnActionsL.addWidget(self.btnRetry)
+        self.horizontalBtnActionsL.addWidget(self.btnRetry)
         # Boton de eliminar de la lista
         self.btnRemove = QPushButton()
         self.btnRemove.setObjectName("btnRemove")
@@ -208,7 +208,7 @@ class DownloadItem(QWidget):
         self.btnRemove.clicked.connect(
             lambda: self.remove_requested.emit(self._download_id)
         )
-        self.verticalBtnActionsL.addWidget(self.btnRemove)
+        self.horizontalBtnActionsL.addWidget(self.btnRemove)
 
     def update_progress(self, percent: int):
         self.progressBar.setValue(percent)

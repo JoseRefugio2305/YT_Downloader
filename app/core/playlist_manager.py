@@ -1,7 +1,9 @@
 from PySide6.QtCore import QObject, Signal
+
 from .download_worker import DownloadWorker
 from ..database.db_manager import DBManager
 from ..database.models import Download, PlaylistDownload
+from .settings import Settings
 
 
 class PlaylistManager(QObject):
@@ -119,6 +121,8 @@ class PlaylistManager(QObject):
             new_worker["format"],
             new_worker["destination"],
             new_worker["id"],
+            video_quality=Settings.get_video_quality(),
+            audio_quality=Settings.get_audio_quality(),
         )
         self._queue.pop(0)  # Quitamos de la cola de espera
         self._workers[new_worker["id"]].status_changed.connect(

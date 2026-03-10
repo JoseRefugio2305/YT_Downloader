@@ -13,7 +13,13 @@ class DownloadWorker(QThread):
     finished = Signal(int)  # emite el download_id al terminar
 
     def __init__(
-        self, url: str, format: str, destination: str, download_id: int = None
+        self,
+        url: str,
+        format: str,
+        destination: str,
+        download_id: int = None,
+        video_quality=None,
+        audio_quality=None,
     ):
         super().__init__()
         self._cancelled = False
@@ -22,9 +28,18 @@ class DownloadWorker(QThread):
         self.destination = destination
         self.download_id = download_id
 
+        self.video_quality = video_quality or "bestvideo[height<=1080]+bestaudio/best"
+        self.audio_quality = audio_quality or "0"
+
     def run(self):
         try:
-            downloader = Downloader(self.destination, self.format, self._on_progress)
+            downloader = Downloader(
+                self.destination,
+                self.format,
+                self._on_progress,
+                video_quality=self.video_quality,
+                audio_quality=self.audio_quality,
+            )
             downloader.download(self.url)
             if not self._cancelled:
                 self.status_changed.emit("completed")

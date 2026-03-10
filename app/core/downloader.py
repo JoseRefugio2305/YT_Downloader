@@ -2,17 +2,21 @@ from yt_dlp import YoutubeDL
 from typing import List, Optional, Tuple
 from pathlib import Path
 
+from .settings import Settings
+
 
 class Downloader:
     FFMPEG_DIR = Path(__file__).parent.parent.parent / "ffmpeg" / "bin"
 
-    def __init__(self, destination: str, format: str, progress_callback=None):
+    def __init__(
+        self,
+        destination: str,
+        format: str,
+        progress_callback=None,
+        video_quality=None,
+        audio_quality=None,
+    ):
         callback = progress_callback if progress_callback else self._progress_hook
-        self.yt_opts = self._build_opts(
-            destination,
-            format,
-            callback,
-        )
         self.yt_dlp_info = {
             "quiet": True,
             "ignoreerrors": True,
@@ -20,6 +24,15 @@ class Downloader:
             "extract_flat": True,
             "skip_download": True,
         }
+
+        self._video_quality = video_quality or Settings.get_video_quality()
+        self._audio_quality = audio_quality or Settings.get_audio_quality()
+
+        self.yt_opts = self._build_opts(
+            destination,
+            format,
+            callback,
+        )
 
     # Metadata sin descargar
     def extract_video_info(self, url: str) -> dict:
@@ -80,9 +93,13 @@ class Downloader:
                     f"[PP Hook] status={d.get('status')} pp={d.get('postprocessor')}"
                 )
             ],
+            "extractor_args": {
+                "youtube": {
+                    "player_client": ["tv_embedded"],  # usa clientes alternativos
+                }
+            },
         }
         if format == "mp3":
-
             opts.update(
                 {
                     "format": "bestaudio/best",
@@ -93,7 +110,7 @@ class Downloader:
                         {
                             "key": "FFmpegExtractAudio",
                             "preferredcodec": "mp3",
-                            "preferredquality": "0",
+                            "preferredquality": self._audio_quality,
                         },
                         {
                             "key": "FFmpegMetadata",  # embebe metadatos ID3
@@ -105,10 +122,12 @@ class Downloader:
                 }
             )
         else:
+            print(Settings.get_video_quality())
             opts.update(
                 {
                     "ffmpeg_location": str(self.FFMPEG_DIR),
-                    "format": "bv*[height<=1080]+ba/b",  # TODO: Tomar las configuraciones de audio y video de settings
+                    "prefer_ffmpeg": True,
+                    "format": self._video_quality,  # TODO: Tomar las configuraciones de audio y video de settings
                     "merge_output_format": "mp4",
                 }
             )

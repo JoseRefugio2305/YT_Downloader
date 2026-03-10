@@ -12,6 +12,7 @@ from ..database.db_manager import DBManager
 from ..core.playlist_manager import PlaylistManager
 from ..core.extract_worker import ExtractInfoWorker
 from ..utils.url_validator import is_valid_youtube_url, detect_url_type
+from ..core.settings import Settings
 
 
 class MainWindow(QMainWindow):
@@ -57,7 +58,13 @@ class MainWindow(QMainWindow):
             is_video_sel = self._show_dialog_type_download()
             type_url = "video" if is_video_sel else "playlist"
 
-        self._extract_worker = ExtractInfoWorker(url, type_url, format)
+        self._extract_worker = ExtractInfoWorker(
+            url,
+            type_url,
+            format,
+            video_quality=Settings.get_video_quality(),
+            audio_quality=Settings.get_audio_quality(),
+        )
         # Activamos dialog de carga
         self._loading = LoadingDialog(
             "Obteniendo información, espera un momento...", self
@@ -75,7 +82,7 @@ class MainWindow(QMainWindow):
         self._loading.exec()
 
     def _on_info_extracted(self, playlist_info: Optional[dict], videos: list):
-        destination = self._settings.get_destination()
+        destination = Settings.get_destination()
         format = self.ui.comboBox.currentText().lower()  # 'mp3' o 'mp4'
 
         if len(videos) == 0:

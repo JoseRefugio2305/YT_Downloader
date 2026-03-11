@@ -125,7 +125,7 @@ class HistoryPanel(QObject):
 
     def _on_delete_from_history(self, row: int, download: Download):
 
-        msgBox = QMessageBox()
+        msgBox = QMessageBox(self._table)
         msgBox.setIcon(QMessageBox.Icon.Question)
         msgBox.setWindowTitle("Confirmar eliminación")
         msgBox.setText(
@@ -150,7 +150,7 @@ class HistoryPanel(QObject):
         self._table.removeRow(row)
 
     def _on_delete_all_history(self):
-        msgBox = QMessageBox()
+        msgBox = QMessageBox(self._table)
         msgBox.setIcon(QMessageBox.Icon.Question)
         msgBox.setWindowTitle("Confirmar eliminación")
         msgBox.setText(

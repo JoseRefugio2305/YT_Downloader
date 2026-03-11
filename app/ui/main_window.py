@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
         self._show_dialog_error(f"Error al obtener información: {error}")
 
     def _show_dialog_error(self, message: str):
-        msg = QMessageBox()
+        msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Icon.Warning)
         msg.setText(message)
         msg.setWindowTitle("Mensaje")
@@ -130,7 +130,7 @@ class MainWindow(QMainWindow):
 
     def _show_dialog_type_download(self) -> bool:  # Video True, playlist False
 
-        msgBox = QMessageBox()
+        msgBox = QMessageBox(self)
         msgBox.setIcon(QMessageBox.Icon.Question)
         msgBox.setWindowTitle("URL de Playlist Detectada")
         msgBox.setText(
@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
         self.ui.inputLink.setText(clipboard.text().strip())
 
     def closeEvent(self, event: QCloseEvent):
-        msgBox = QMessageBox()
+        msgBox = QMessageBox(self)
         msgBox.setIcon(QMessageBox.Icon.Question)
         msgBox.setWindowTitle("Confirmar salida")
         msgBox.setText(

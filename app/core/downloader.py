@@ -2,7 +2,7 @@ from yt_dlp import YoutubeDL
 from typing import List, Optional, Tuple
 from pathlib import Path
 
-from .settings import Settings
+from .settings.settings import Settings
 
 
 class Downloader:

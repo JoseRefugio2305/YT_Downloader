@@ -2,9 +2,9 @@ from PySide6.QtCore import QObject, Qt
 from PySide6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
 from .download_item import DownloadItem
-from ...database.db_manager import DBManager
-from ...core.playlist_manager import PlaylistManager
-from ...core.download_worker import DownloadWorker
+from ....database.db_manager import DBManager
+from ....core.playlist_manager import PlaylistManager
+from ....core.workers.download_worker import DownloadWorker
 
 
 class DownloadQueue(QObject):

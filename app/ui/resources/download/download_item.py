@@ -10,8 +10,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ...utils.text_helpers import get_status_color
-from ...core.download_worker import DownloadWorker
+from ....utils.text_helpers import get_status_color
+from ....core.workers.download_worker import DownloadWorker
 
 
 class DownloadItem(QWidget):

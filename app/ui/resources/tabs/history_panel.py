@@ -11,10 +11,10 @@ from PySide6.QtWidgets import (
     QMessageBox,
 )
 
-from .download_queue import DownloadQueue
-from ...database.db_manager import DBManager
-from ...database.models import Download
-from ...utils.text_helpers import get_status_color
+from ..download.download_queue import DownloadQueue
+from ....database.db_manager import DBManager
+from ....database.models import Download
+from ....utils.text_helpers import get_status_color
 
 
 class HistoryPanel(QObject):

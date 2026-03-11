@@ -1,6 +1,6 @@
 from PySide6.QtCore import QThread, Signal
 
-from .downloader import Downloader
+from ..downloader import Downloader
 
 
 class ExtractInfoWorker(QThread):

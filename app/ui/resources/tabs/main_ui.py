@@ -50,7 +50,7 @@ from pathlib import Path
 
 class UIMainWindow(object):
 
-    ASSETS_DIR = Path(__file__).parent.parent.parent.parent / "assets"
+    ASSETS_DIR = Path(__file__).parent.parent.parent.parent.parent / "assets"
 
     def setupUi(self, Form):
         if not Form.objectName():

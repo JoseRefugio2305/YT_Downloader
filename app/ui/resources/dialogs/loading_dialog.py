@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 class LoadingDialog(QDialog):
-    ASSETS_DIR = Path(__file__).parent.parent.parent.parent / "assets"
+    ASSETS_DIR = Path(__file__).parent.parent.parent.parent.parent / "assets"
 
     def __init__(self, message: str, parent=None):
         super().__init__(parent)

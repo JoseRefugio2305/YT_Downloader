@@ -3,16 +3,16 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QCloseEvent
 from typing import Optional
 
-from .resources.main_ui import UIMainWindow
-from ..ui.resources.settings_dialog import SettingsDialog
-from ..ui.resources.download_queue import DownloadQueue
-from ..ui.resources.history_panel import HistoryPanel
-from ..ui.resources.loading_dialog import LoadingDialog
+from .resources.tabs.main_ui import UIMainWindow
+from .resources.dialogs.settings_dialog import SettingsDialog
+from .resources.download.download_queue import DownloadQueue
+from .resources.tabs.history_panel import HistoryPanel
+from .resources.dialogs.loading_dialog import LoadingDialog
 from ..database.db_manager import DBManager
 from ..core.playlist_manager import PlaylistManager
-from ..core.extract_worker import ExtractInfoWorker
+from ..core.workers.extract_worker import ExtractInfoWorker
 from ..utils.url_validator import is_valid_youtube_url, detect_url_type, clean_url
-from ..core.settings import Settings
+from ..core.settings.settings import Settings
 
 
 class MainWindow(QMainWindow):

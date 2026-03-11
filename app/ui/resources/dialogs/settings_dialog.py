@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
 )
 
-from ...core.settings import Settings
+from ....core.settings.settings import Settings
 
 
 class SettingsDialog(QDialog):

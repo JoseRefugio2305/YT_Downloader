@@ -1,6 +1,6 @@
 from PySide6.QtCore import QThread, Signal
-from .downloader import Downloader
-from ..utils.format_helper import format_file_size, format_duration
+from ..downloader import Downloader
+from ...utils.format_helper import format_file_size, format_duration
 
 
 class DownloadWorker(QThread):

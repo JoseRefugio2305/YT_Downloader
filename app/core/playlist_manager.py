@@ -1,9 +1,9 @@
 from PySide6.QtCore import QObject, Signal, QTimer
 
-from .download_worker import DownloadWorker
+from .workers.download_worker import DownloadWorker
 from ..database.db_manager import DBManager
 from ..database.models import Download, PlaylistDownload
-from .settings import Settings
+from .settings.settings import Settings
 
 
 class PlaylistManager(QObject):

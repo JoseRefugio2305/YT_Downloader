@@ -11,7 +11,7 @@ from ..ui.resources.loading_dialog import LoadingDialog
 from ..database.db_manager import DBManager
 from ..core.playlist_manager import PlaylistManager
 from ..core.extract_worker import ExtractInfoWorker
-from ..utils.url_validator import is_valid_youtube_url, detect_url_type
+from ..utils.url_validator import is_valid_youtube_url, detect_url_type, clean_url
 from ..core.settings import Settings
 
 
@@ -57,6 +57,8 @@ class MainWindow(QMainWindow):
         if type_url == "video/playlist":
             is_video_sel = self._show_dialog_type_download()
             type_url = "video" if is_video_sel else "playlist"
+            playlist_url, video_url = clean_url(url)
+            url = video_url if is_video_sel else playlist_url
 
         self._extract_worker = ExtractInfoWorker(
             url,

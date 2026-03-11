@@ -34,3 +34,6 @@ def detect_url_type(url: str) -> str:
         return "video"
     elif PLAYLIST_REGEX.match(url):
         return "playlist"
+    
+    return "unknown"
+

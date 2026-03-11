@@ -89,10 +89,12 @@ class MainWindow(QMainWindow):
             self._show_dialog_error(
                 "Ocurrió un error al intentar obtener la información de la plalist"
             )
+            return
         elif len(videos) == 1 and not videos[0]:
             self._show_dialog_error(
                 "Ocurrió un error al intentar obtener la información del video"
             )
+            return
 
         for video in videos:
             if playlist_info:

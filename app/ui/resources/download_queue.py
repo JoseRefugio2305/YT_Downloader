@@ -64,7 +64,7 @@ class DownloadQueue(QObject):
         )
 
         item = self._items.pop(download_id)  # quitamos con el id viejo
-        item._download_id = new_download_id  # actualizamos su id
+        item.update_download_id(new_download_id)  # actualizamos su id
         self._items[new_download_id] = item
 
         self._playlist_manager.start_enqueue()

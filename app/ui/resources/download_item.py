@@ -45,9 +45,6 @@ class DownloadItem(QWidget):
         self.setMaximumSize(QSize(950, 90))
 
         # Vertical Layout Principal
-        self.verticalPrincLW = QWidget(self)
-        self.verticalPrincLW.setObjectName("verticalPrincLW")
-        self.verticalPrincLW.setGeometry(QRect(0, 0, 950, 90))
         self.verticalPrincL = QVBoxLayout(self)
         self.verticalPrincL.setObjectName("verticalPrincL")
         self.verticalPrincL.setContentsMargins(5, 5, 5, 5)
@@ -170,6 +167,9 @@ class DownloadItem(QWidget):
             lambda: self.remove_requested.emit(self._download_id)
         )
         self.horizontalBtnActionsL.addWidget(self.btnRemove)
+
+    def update_download_id(self, new_id: int):
+        self._download_id = new_id
 
     def update_progress(self, percent: int):
         self.progressBar.setValue(percent)

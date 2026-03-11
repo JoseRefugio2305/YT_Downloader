@@ -119,17 +119,17 @@ class HistoryPanel(QObject):
 
     def _load_history(self):
         history = self._db.get_downloads()
-        for doanload in history:
+        for download in history:
             row = self._table.rowCount()
-            self._add_row(row, doanload)
+            self._add_row(row, download)
 
-    def _on_delete_from_history(self, row: int, doanload: Download):
+    def _on_delete_from_history(self, row: int, download: Download):
 
         msgBox = QMessageBox()
         msgBox.setIcon(QMessageBox.Icon.Question)
         msgBox.setWindowTitle("Confirmar eliminación")
         msgBox.setText(
-            f"¿Estás seguro de querer eliminar {doanload.title} del historial?"
+            f"¿Estás seguro de querer eliminar {download.title} del historial?"
         )
         msgBox.setStandardButtons(
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
@@ -146,7 +146,7 @@ class HistoryPanel(QObject):
         if msgBox.clickedButton() == buttonN:
             return
 
-        self._db.delete_download(doanload.id)
+        self._db.delete_download(download.id)
         self._table.removeRow(row)
 
     def _on_delete_all_history(self):

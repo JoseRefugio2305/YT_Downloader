@@ -259,8 +259,8 @@ class DBManager:
 
     def delete_historial(self):
         with self._connect() as conn:
-            conn.execute("DELETE FROM downloads WHERE id >=1")
-            conn.execute("DELETE FROM playlist_downloads WHERE id >=1")
+            conn.execute("DELETE FROM downloads")
+            conn.execute("DELETE FROM playlist_downloads")
 
     @staticmethod
     def _row_to_download(row: sqlite3.Row) -> Download:

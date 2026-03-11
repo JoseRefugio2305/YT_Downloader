@@ -128,7 +128,6 @@ class Downloader:
                 }
             )
         else:
-            print(Settings.get_video_quality())
             opts.update(
                 {
                     "ffmpeg_location": str(self.FFMPEG_DIR),

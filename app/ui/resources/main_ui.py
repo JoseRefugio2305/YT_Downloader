@@ -45,9 +45,13 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from pathlib import Path
 
 
 class UIMainWindow(object):
+
+    ASSETS_DIR = Path(__file__).parent.parent.parent.parent / "assets"
+
     def setupUi(self, Form):
         if not Form.objectName():
             Form.setObjectName("Form")
@@ -121,7 +125,7 @@ class UIMainWindow(object):
         self.lblInfo.setFont(font)
         self.label = QLabel(self.tab_3)
         self.label.setObjectName("label")
-        self.label.setGeometry(QRect(10, 10, 331, 111))
+        self.label.setGeometry(QRect(10, 10, 330, 200))
         font4 = QFont()
         font4.setPointSize(30)
         font4.setBold(True)
@@ -179,6 +183,7 @@ class UIMainWindow(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", "YT Downloader", None))
+        Form.setWindowIcon(QIcon(str(self.ASSETS_DIR / "logo.png")))
         self.btnPasteLink.setText(
             QCoreApplication.translate("Form", "\U0001f4cb", None)
         )
@@ -186,7 +191,15 @@ class UIMainWindow(object):
         self.lblInfo.setText(
             QCoreApplication.translate("Form", "Lista de Descargas", None)
         )
-        self.label.setText(QCoreApplication.translate("Form", "YT Downloader", None))
+        # self.label.setText(QCoreApplication.translate("Form", "YT Downloader", None))
+        self.label.setPixmap(
+            QPixmap(str(self.ASSETS_DIR / "logo.png")).scaled(
+                200,
+                200,  # ancho, alto en píxeles
+                Qt.KeepAspectRatio,  # mantiene proporciones
+                Qt.SmoothTransformation,  # suaviza el escalado
+            )
+        )
         self.comboBox.setItemText(0, QCoreApplication.translate("Form", "MP3", None))
         self.comboBox.setItemText(1, QCoreApplication.translate("Form", "MP4", None))
 

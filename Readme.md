@@ -1,6 +1,8 @@
 # YT Downloader
 
-<img src="./assets/logo.png" style="width:300px; height:auto; display:block; margin:auto;">
+<p align="center">
+  <img src="./assets/logo.png" style="width:300px; height:auto; display:block; margin:auto;">
+</p>
 
 YT Downloader es una aplicación de escritorio para Windows que permite descargar videos y audio de YouTube de forma sencilla. Soporta descargas individuales y playlists completas, con control de calidad, cola de descargas simultáneas e historial persistente.
 
@@ -123,7 +125,5 @@ yt-downloader/
 
 ---
 
->[!NOTE]
+> [!NOTE]
 > Este proyecto es de uso personal y educativo. El uso de esta herramienta debe respetar los terminos de servicio de YouTube y las leyes de derechos de autor aplicables en tu pais.
-
-

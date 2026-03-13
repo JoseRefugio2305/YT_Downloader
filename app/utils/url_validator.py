@@ -5,6 +5,9 @@ DOMINIO_REGEX = re.compile(r"^https?:\/\/([\w-]+\.)?(youtube\.com|youtu\.be)\/.+
 VIDEO_COMP_REGEX = re.compile(
     r"^https?:\/\/(www\.)?youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}(&.*)?$"
 )
+VIDEO_MUSIC_REGEX = re.compile(
+    r"^https?:\/\/(www\.|music\.)?youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}(&.*)?$"
+)
 VIDEO_CORTO_REGEX = re.compile(
     r"^https?:\/\/(www\.)?youtu\.be\/[A-Za-z0-9_-]{11}(\?.*)?$"
 )
@@ -29,6 +32,7 @@ def detect_url_type(url: str) -> str:
         return "video/playlist"
     elif (
         VIDEO_COMP_REGEX.match(url)
+        or VIDEO_MUSIC_REGEX.match(url)
         or VIDEO_CORTO_REGEX.match(url)
         or SHORT_REGEX.match(url)
     ):

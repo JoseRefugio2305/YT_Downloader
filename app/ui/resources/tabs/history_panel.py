@@ -9,6 +9,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
     QMessageBox,
+    QComboBox,
+    QLineEdit,
 )
 
 from ..download.download_queue import DownloadQueue
@@ -21,14 +23,13 @@ class HistoryPanel(QObject):
     def __init__(
         self,
         table: QTableWidget,
-        delete_all_btn: QPushButton,
+        widgetBusHist: QWidget,
         queue: DownloadQueue,
         db: DBManager,
     ):
         super().__init__()
         self._table = table
-        self._delete_all_btn = delete_all_btn
-        self._delete_all_btn.clicked.connect(self._on_delete_all_history)
+        self._widget_bus_hist = widgetBusHist
         self._queue = queue
         self._db = db
         self.COL_TITLE = 0
@@ -37,8 +38,33 @@ class HistoryPanel(QObject):
         self.COL_DATE = 3
         self.COL_ROUTE = 4
         self.COL_ACTIONS = 5
+        self._set_up_search_widget()
         self._setup_table()
         self._load_history()
+
+    def _set_up_search_widget(self):
+        self._delete_all_btn = self._widget_bus_hist.findChild(
+            QPushButton, "btnLimpiarH"
+        )
+        self._delete_all_btn.clicked.connect(self._on_delete_all_history)
+        self._input_search = self._widget_bus_hist.findChild(
+            QLineEdit, "inputSearchHist"
+        )
+        self._btn_search_hist = self._widget_bus_hist.findChild(
+            QPushButton, "btnSearchHistorial"
+        )
+        self._btn_search_hist.clicked.connect(self._on_search_history)
+        self._btn_clean_search = self._widget_bus_hist.findChild(
+            QPushButton, "btnCleanSearch"
+        )
+        self._btn_clean_search.clicked.connect(self._on_clean_search)
+        self._combo_status = self._widget_bus_hist.findChild(QComboBox, "comboStatus")
+        # 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled'
+        self._combo_status.addItem("Completado", "completed")
+        self._combo_status.addItem("Pendiente", "pending")
+        self._combo_status.addItem("Descargando", "downloading")
+        self._combo_status.addItem("Cancelada", "cancelled")
+        self._combo_status.addItem("Fallo", "failed")
 
     def _setup_table(self):
         font = QFont()
@@ -117,8 +143,13 @@ class HistoryPanel(QObject):
                     item.setForeground(QColor("#000000"))
                     item.setBackground(color)
 
-    def _load_history(self):
-        history = self._db.get_downloads()
+    def _load_history(self, is_search: bool = False):
+        if is_search:
+            txt_search = self._input_search.text().strip().lower()
+            status = self._combo_status.currentData()
+            history = self._db.get_downloads(status=status, txt_search=txt_search)
+        else:
+            history = self._db.get_downloads()
         for download in history:
             row = self._table.rowCount()
             self._add_row(row, download)
@@ -179,6 +210,14 @@ class HistoryPanel(QObject):
         self._queue._on_retry_requested(download.id)
         self.refresh()
 
-    def refresh(self):
+    def _on_search_history(self):
+        self.refresh(True)
+
+    def _on_clean_search(self):
+        self._combo_status.setCurrentIndex(0)
+        self._input_search.setText("")
+        self.refresh()
+
+    def refresh(self, is_search: bool = False):
         self._table.setRowCount(0)
-        self._load_history()
+        self._load_history(is_search=is_search)

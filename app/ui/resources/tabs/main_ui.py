@@ -156,17 +156,44 @@ class UIMainWindow(object):
         self.tab_4.setObjectName("tab_4")
         self.tableHistorial = QTableWidget(self.tab_4)
         self.tableHistorial.setObjectName("tableHistorial")
-        self.tableHistorial.setGeometry(QRect(10, 60, 978, 551))
-        self.btnLimpiarH = QPushButton(self.tab_4)
-        self.btnLimpiarH.setObjectName("btnLimpiarH")
-        self.btnLimpiarH.setGeometry(QRect(820, 10, 161, 41))
+        self.tableHistorial.setGeometry(QRect(10, 120, 978, 491))
+        self.label_2 = QLabel(self.tab_4)
+        self.label_2.setObjectName("label_2")
+        self.label_2.setGeometry(QRect(10, 80, 401, 31))
+        self.widgetBusHistorial = QWidget(self.tab_4)
+        self.widgetBusHistorial.setObjectName("widgetBusHistorial")
+        self.widgetBusHistorial.setGeometry(QRect(20, 10, 961, 111))
+        self.btnSearchHistorial = QPushButton(self.widgetBusHistorial)
+        self.btnSearchHistorial.setObjectName("btnSearchHistorial")
+        self.btnSearchHistorial.setGeometry(QRect(770, 10, 131, 40))
         font5 = QFont()
         font5.setPointSize(12)
         font5.setBold(True)
         font5.setItalic(False)
+        self.btnSearchHistorial.setFont(font5)
+        self.btnSearchHistorial.setStyleSheet(
+            "background-color: rgb(108, 9, 200);\n" "color: rgb(255, 255, 255);"
+        )
+        self.inputSearchHist = QLineEdit(self.widgetBusHistorial)
+        self.inputSearchHist.setObjectName("inputSearchHist")
+        self.inputSearchHist.setGeometry(QRect(170, 10, 591, 40))
+        self.inputSearchHist.setFont(font5)
+        self.comboStatus = QComboBox(self.widgetBusHistorial)
+        self.comboStatus.setObjectName("comboStatus")
+        self.comboStatus.setGeometry(QRect(0, 10, 161, 40))
+        self.comboStatus.setFont(font5)
+        self.btnLimpiarH = QPushButton(self.widgetBusHistorial)
+        self.btnLimpiarH.setObjectName("btnLimpiarH")
+        self.btnLimpiarH.setGeometry(QRect(770, 60, 191, 40))
         self.btnLimpiarH.setFont(font5)
         self.btnLimpiarH.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnLimpiarH.setStyleSheet(
+            "background-color: rgb(108, 9, 200);\n" "color: rgb(255, 255, 255);"
+        )
+        self.btnCleanSearch = QPushButton(self.widgetBusHistorial)
+        self.btnCleanSearch.setObjectName("btnCleanSearch")
+        self.btnCleanSearch.setGeometry(QRect(910, 10, 51, 40))
+        self.btnCleanSearch.setStyleSheet(
             "background-color: rgb(108, 9, 200);\n" "color: rgb(255, 255, 255);"
         )
         self.mainTab.addTab(self.tab_4, "")
@@ -183,7 +210,7 @@ class UIMainWindow(object):
 
     def retranslateUi(self, Form):
         Form.setWindowTitle(QCoreApplication.translate("Form", "YT Downloader", None))
-        Form.setWindowIcon(QIcon(str(self.ASSETS_DIR / "logo.png")))
+        Form.setWindowIcon(QIcon(str(self.ASSETS_DIR / "icon.ico")))
         self.btnPasteLink.setText(
             QCoreApplication.translate("Form", "\U0001f4cb", None)
         )
@@ -191,7 +218,7 @@ class UIMainWindow(object):
         self.lblInfo.setText(
             QCoreApplication.translate("Form", "Lista de Descargas", None)
         )
-        # self.label.setText(QCoreApplication.translate("Form", "YT Downloader", None))
+        # self.label.setText(QCoreApplication.translate("Form", u"YT Downloader", None))
         self.label.setPixmap(
             QPixmap(str(self.ASSETS_DIR / "logo.png")).scaled(
                 200,
@@ -210,9 +237,16 @@ class UIMainWindow(object):
             self.mainTab.indexOf(self.tab_3),
             QCoreApplication.translate("Form", "Descargas", None),
         )
+        self.label_2.setText(
+            QCoreApplication.translate("Form", "Historial de Descargas", None)
+        )
+        self.btnSearchHistorial.setText(
+            QCoreApplication.translate("Form", "Buscar", None)
+        )
         self.btnLimpiarH.setText(
             QCoreApplication.translate("Form", "Limpiar Historial", None)
         )
+        self.btnCleanSearch.setText(QCoreApplication.translate("Form", "\u274c", None))
         self.mainTab.setTabText(
             self.mainTab.indexOf(self.tab_4),
             QCoreApplication.translate("Form", "Historial", None),

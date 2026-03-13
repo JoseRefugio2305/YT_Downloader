@@ -130,12 +130,30 @@ class DBManager:
 
         return self._row_to_download(row) if row else None
 
-    def get_downloads(self, status: Optional[str] = None, limit=200, offset: int = 0):
+    def get_downloads(
+        self,
+        status: Optional[str] = None,
+        txt_search: Optional[str] = None,
+        limit=200,
+        offset: int = 0,
+    ):
         query = "SELECT * FROM downloads"
         params: list = []
+
+        if status or txt_search:
+            query += " WHERE "
+
         if status:
-            query += " WHERE status = ?"
+            query += " status = ?"
             params.append(status)
+
+        if status and txt_search:
+            query+=" AND "
+
+        if txt_search:
+            txt_search=f"%{txt_search}%"
+            query += " LOWER(title) LIKE ?"
+            params.append(txt_search)
 
         query += " ORDER BY COALESCE(playlist_id, id), playlist_id NULLS LAST, created_at DESC LIMIT ? OFFSET ?"
         params += [limit, offset]

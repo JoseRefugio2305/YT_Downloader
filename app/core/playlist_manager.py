@@ -94,7 +94,7 @@ class PlaylistManager(QObject):
 
     def cancel_all(self) -> None:
         # Cancelamos descargas en proceso
-        for _, worker in list(self._workers.values()):
+        for worker in list(self._workers.values()):
             worker.cancel()
         # vaciamos lista de espera
         for el in self._queue:

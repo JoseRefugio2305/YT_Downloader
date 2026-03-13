@@ -4,6 +4,7 @@ from typing import List
 
 
 class SettingsApp:
+
     def __init__(self):
         self._settings = QSettings("YTDownloader", "config")
 
@@ -41,6 +42,9 @@ class SettingsApp:
     def get_player_client(self) -> List[str]:
         # Valores en la lista  "web", "android", "tv_embedded"
         return self._settings.value("player_client", ["tv_embedded"], type=list)
+
+    def get_theme(self) -> str:
+        return self._settings.value("theme", "system", type=str)
 
 
 Settings = SettingsApp()

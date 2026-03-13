@@ -3,6 +3,7 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QDialog,
     QFileDialog,
+    QApplication,
     QComboBox,
     QSpinBox,
     QComboBox,
@@ -13,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from ....core.settings.settings import Settings
+from ....utils.constants import THEME_SCHEME
 
 
 class SettingsDialog(QDialog):
@@ -146,6 +148,23 @@ class SettingsDialog(QDialog):
         self.horizontalClientL.addWidget(self.combo_player_client)
         self.layoutPrinc.addLayout(self.horizontalClientL)
 
+        # Tema
+        # Calidad de video
+        self.horizontalThemeL = QHBoxLayout()
+        self.horizontalThemeL.setObjectName("horizontalThemeL")
+        self.horizontalThemeL.setContentsMargins(0, 0, 0, 0)
+        self.layoutPrinc.addLayout(self.horizontalThemeL)
+        self.lbl_theme = QLabel("Tema: ")
+        self.lbl_theme.setFont(font2)
+        self.combo_theme = QComboBox()
+        self.combo_theme.setObjectName("combo_theme")
+        self.combo_theme.setFont(font2)
+        self.combo_theme.addItem("Sistema", "system")
+        self.combo_theme.addItem("Claro", "light")
+        self.combo_theme.addItem("Oscuro", "dark")
+        self.horizontalThemeL.addWidget(self.lbl_theme)
+        self.horizontalThemeL.addWidget(self.combo_theme)
+
         # Botones Aplicar/Cancelar
         self.horizontalBtnFooterL = QHBoxLayout()
         self.horizontalBtnFooterL.setObjectName("horizontalBtnFooterL")
@@ -181,7 +200,14 @@ class SettingsDialog(QDialog):
         Settings._settings.setValue(
             "player_client", self.combo_player_client.currentData()
         )
+        self._apply_theme()
         self.accept()
+
+    def _apply_theme(self):
+        selected_theme = self.combo_theme.currentData()
+        Settings._settings.setValue("theme", selected_theme)
+        app = QApplication.instance()
+        app.styleHints().setColorScheme(THEME_SCHEME[selected_theme])
 
     def _load_settings(self):
         self.lbl_dest_sel.setText(str(Settings.get_destination()))
@@ -202,6 +228,10 @@ class SettingsDialog(QDialog):
         idx = self.combo_player_client.findData(Settings.get_player_client())
         if idx >= 0:
             self.combo_player_client.setCurrentIndex(idx)
+
+        idx = self.combo_theme.findData(Settings.get_theme())
+        if idx >= 0:
+            self.combo_theme.setCurrentIndex(idx)
 
         self.spin_delay.setValue(Settings.get_download_delay())
 

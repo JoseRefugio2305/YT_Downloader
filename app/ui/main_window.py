@@ -11,7 +11,7 @@ from .resources.dialogs.loading_dialog import LoadingDialog
 from ..database.db_manager import DBManager
 from ..core.playlist_manager import PlaylistManager
 from ..core.workers.extract_worker import ExtractInfoWorker
-from ..utils.url_validator import is_valid_youtube_url, detect_url_type, clean_url
+from ..utils.url_validator import detect_url_type, clean_yt_url, is_valid_url
 from ..core.settings.settings import Settings
 
 
@@ -44,8 +44,8 @@ class MainWindow(QMainWindow):
         url = self.ui.inputLink.text().strip()
         format = self.ui.comboBox.currentText().lower()  # 'mp3' o 'mp4'
 
-        if not is_valid_youtube_url(url):
-            self._show_dialog_error("El link no es un link de Youtube valido.")
+        if not is_valid_url(url):
+            self._show_dialog_error("El link no es un link de una red social valida.")
             return
 
         type_url = detect_url_type(url)
@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         if type_url == "video/playlist":
             is_video_sel = self._show_dialog_type_download()
             type_url = "video" if is_video_sel else "playlist"
-            playlist_url, video_url = clean_url(url)
+            playlist_url, video_url = clean_yt_url(url)
             url = video_url if is_video_sel else playlist_url
 
         self._extract_worker = ExtractInfoWorker(

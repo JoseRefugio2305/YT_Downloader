@@ -6,3 +6,4 @@ ffmpeg/*
 !ffmpeg/.gitkeep
 tests/
 dist/
+logs/

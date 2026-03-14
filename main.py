@@ -6,11 +6,15 @@ from app.database.db_manager import DBManager
 from app.ui.main_window import MainWindow
 from app.core.settings.settings import Settings
 from app.utils.constants import THEME_SCHEME
+from app.core.logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def main():
     db = DBManager("data/downloads.db")
-    print(f"[DB] Inicializada en: {db.db_path.resolve()}")
+    logger.info("Iniciando YT Downloader")
+    logger.info(f"[DB] Inicializada en: {db.db_path.resolve()}")
 
     app = QApplication(sys.argv)
 

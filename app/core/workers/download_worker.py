@@ -1,6 +1,10 @@
 from PySide6.QtCore import QThread, Signal
+
 from ..downloader import Downloader
 from ...utils.format_helper import format_file_size, format_duration
+from ..logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class DownloadWorker(QThread):
@@ -44,13 +48,25 @@ class DownloadWorker(QThread):
                 audio_quality=self.audio_quality,
             )
             downloader.download(self.url)
+            logger.info(
+                f"Iniciando DownloadWorker con id {self.download_id} y url {self.url}"
+            )
             if not self._cancelled:
+                logger.info(
+                    f"DownloadWorker con id {self.download_id} y url {self.url} completado en ruta {self._final_filepath}"
+                )
                 self.status_changed.emit("completed")
                 self.finished.emit(self.download_id, self._final_filepath)
             else:  # Si esta cancelado emitimos el estado
+                logger.info(
+                    f"DownloadWorker con id {self.download_id} y url {self.url} cancelado"
+                )
                 self.status_changed.emit("cancelled")
                 self.finished.emit(self.download_id, "")
         except Exception as e:
+            logger.error(
+                f"DownloadWorker con id {self.download_id} y url {self.url} error: {str(e)}"
+            )
             if self._cancelled:
                 self.status_changed.emit("cancelled")  # <- cancelación no es fallo
             else:
@@ -83,14 +99,19 @@ class DownloadWorker(QThread):
         except Exception as e:
             self.error.emit("Error al descargar.")
             self.status_changed.emit("failed")
-            print(str(e))
+            logger.error(
+                f"DownloadWorker con id {self.download_id} y url {self.url} con error el _on_progress error: {str(e)}"
+            )
             raise  # Relanzamos la excepcion para que run( ) la tome y el emita el finished
 
     def _on_post_process(self, data: dict):
         if data.get("status") != "finished":
             return
-        
+
         if data.get("postprocessor") == "MoveFiles":
+            logger.info(
+                f"Postprocesamiento de DownloadWorker con id {self.download_id} y url {self.url} terminado"
+            )
             self._final_filepath = data["info_dict"].get("filepath", "")
 
     def cancel(self):

@@ -17,6 +17,9 @@ from ..download.download_queue import DownloadQueue
 from ....database.db_manager import DBManager
 from ....database.models import Download
 from ....utils.text_helpers import get_status_color
+from ....core.logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class HistoryPanel(QObject):
@@ -190,7 +193,7 @@ class HistoryPanel(QObject):
 
         if msgBox.clickedButton() == buttonN:
             return
-
+        logger.info(f"Eliminando descarga con id {download.id} del historial")
         self._db.delete_download(download.id)
         self._table.removeRow(row)
 
@@ -216,6 +219,7 @@ class HistoryPanel(QObject):
         if msgBox.clickedButton() == buttonN:
             return
 
+        logger.info(f"Eliminando todo el historial de descargas")
         self._db.delete_historial()
         self.refresh()
 

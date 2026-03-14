@@ -4,6 +4,9 @@ from .workers.download_worker import DownloadWorker
 from ..database.db_manager import DBManager
 from ..database.models import Download, PlaylistDownload
 from .settings.settings import Settings
+from .logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class PlaylistManager(QObject):
@@ -75,12 +78,16 @@ class PlaylistManager(QObject):
                 "status": "pending",
             }
         )
+
+        logger.info(f"Item encolado con id {download_id}")
+
         return download_id
 
     def start_enqueue(self):
         self._start_next()  # Iniciamos la descarga
 
     def cancel_item(self, download_id: int) -> None:
+        logger.info(f"Item cancelado con id {download_id}")
         if (
             download_id in self._workers
         ):  # Si el item esta en proceso de descarga lo buscamos en _workers
@@ -93,6 +100,7 @@ class PlaylistManager(QObject):
                 self._db.update_downloaded_status(download_id, "cancelled")
 
     def cancel_all(self) -> None:
+        logger.info("Cancelando todos en playlist_manager")
         # Cancelamos descargas en proceso
         for worker in list(self._workers.values()):
             worker.cancel()
@@ -136,9 +144,11 @@ class PlaylistManager(QObject):
         self._workers[new_worker["id"]].finished.connect(self._on_work_finished)
         self._workers[new_worker["id"]].start()
 
+        logger.info(f"Iniciando item encolado con id {new_worker["id"]}")
         self.item_started.emit(new_worker["id"], self._workers[new_worker["id"]])
 
     def _on_work_finished(self, download_id: int, final_path: str):
+        logger.info(f"Item con id {download_id} finalizo")
         self.item_finished.emit(download_id)
         self._workers.pop(download_id, None)  # Si no existe no da error
         if final_path != "":
@@ -146,7 +156,7 @@ class PlaylistManager(QObject):
                 download_id=download_id, destination_path=final_path
             )
 
-        # Revisamos si hay una playlist asiciada a la descarga
+        # Revisamos si hay una playlist asociada a la descarga
         playlist_id = self._db.get_playlist_id(download_id)
         if playlist_id:
             playlist = self._db.get_playlist_by_id(playlist_id)

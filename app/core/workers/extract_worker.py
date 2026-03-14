@@ -1,6 +1,9 @@
 from PySide6.QtCore import QThread, Signal
 
 from ..downloader import Downloader
+from ..logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class ExtractInfoWorker(QThread):
@@ -27,6 +30,7 @@ class ExtractInfoWorker(QThread):
 
     def run(self):
         try:
+            logger.info(f"ExtractWorker para url {self.url} iniciado")
             downloader = Downloader(
                 destination="",
                 format=self.format,
@@ -41,4 +45,7 @@ class ExtractInfoWorker(QThread):
                 self.finished.emit(None, [info])
 
         except Exception as e:
+            logger.error(
+                f"ExtractWorker para url {self.url} termino en error: {str(e)}"
+            )
             self.error.emit(str(e))

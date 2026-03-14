@@ -3,6 +3,9 @@ from typing import List, Optional, Tuple
 from pathlib import Path
 
 from .settings.settings import Settings
+from .logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class Downloader:
@@ -41,12 +44,16 @@ class Downloader:
         with YoutubeDL(self.yt_dlp_info) as ytdl:
             try:
                 info = ytdl.extract_info(url, download=False)
+                logger.debug(f"Obteniendo informacion de video {url}")
                 if info:
                     return self._info_to_dict(info)
                 else:
+                    logger.error(f"No se obtuvo informacion de video {url}")
                     return None
             except Exception as e:
-                print(str(e))
+                logger.error(
+                    f"Error en extraccion de informacion de video {url}: {str(e)}"
+                )
                 return None
 
     def extract_playlist_info(self, url: str) -> Tuple[Optional[dict], List[dict]]:
@@ -55,20 +62,26 @@ class Downloader:
                 info = ytdl.extract_info(url, download=False)
                 data = []
                 playlist_data = self._info_playlist_to_dict(info)
+                logger.debug(f"Obteniendo informacion de playlist {url}")
                 for entry in info["entries"]:
                     data.append(self._info_to_dict(entry))
                 return playlist_data, data
             except Exception as e:
-                print(str(e))
+                logger.error(
+                    f"Error en extraccion de informacion de playlist {url}: {str(e)}"
+                )
                 return None, []
 
     def download(self, url: str):  # Descarga del archivo
-        print(f"[Downloader] Llamando yt-dlp con URL: {url}")
+        logger.debug(f"Llamando yt-dlp con URL: {url}")
+        logger.debug(f"Llamando yt-dlp con opts: {self.yt_opts}")
         with YoutubeDL(self.yt_opts) as ytdlp:
             try:
                 result = ytdlp.download([url])
             except Exception as e:
                 import traceback
+
+                logger.error(f"Error al descargar {url}: {traceback.print_exc()}")
 
                 traceback.print_exc()
                 raise
@@ -132,7 +145,7 @@ class Downloader:
                 {
                     "ffmpeg_location": str(self.FFMPEG_DIR),
                     "prefer_ffmpeg": True,
-                    "format": self._video_quality,  # TODO: Tomar las configuraciones de audio y video de settings
+                    "format": self._video_quality,
                     "merge_output_format": "mp4",
                 }
             )

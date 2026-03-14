@@ -18,7 +18,9 @@ from ....utils.text_helpers import get_status_color
 from ....core.workers.download_worker import DownloadWorker
 from ....database.db_manager import DBManager
 from ...resources.dialogs.rename_dialog import RenameDialog
+from ....core.logging.logger import get_logger
 
+logger=get_logger(__name__)
 
 class DownloadItem(QWidget):
     # Accion de cancelar y de reintentar
@@ -233,6 +235,7 @@ class DownloadItem(QWidget):
         new_path = current_path.parent / f"{new_name}{current_path.suffix}"
         if new_path.exists():
             # Avisamos que ya existe un archivo con ese nombre
+            logger.error("Ya existe un archivo con ese nombre en la carpeta de destino.")
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setText("Ya existe un archivo con ese nombre en la carpeta de destino.")
@@ -247,9 +250,10 @@ class DownloadItem(QWidget):
                 self._download_id, title=new_name, destination_path=str(new_path)
             )
         except Exception as e:
+            logger.error(f"No se pudo renombrar el archivo: {str(e)}")
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Warning)
-            msg.setText(f"No se pudo renombrar el archivo: {e}")
+            msg.setText(f"No se pudo renombrar el archivo: {str(e)}")
             msg.exec()
 
     # Eventos para simular el hover

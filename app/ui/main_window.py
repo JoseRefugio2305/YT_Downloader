@@ -13,6 +13,9 @@ from ..core.playlist_manager import PlaylistManager
 from ..core.workers.extract_worker import ExtractInfoWorker
 from ..utils.url_validator import detect_url_type, clean_yt_url, is_valid_url
 from ..core.settings.settings import Settings
+from ..core.logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -45,12 +48,14 @@ class MainWindow(QMainWindow):
         format = self.ui.comboBox.currentText().lower()  # 'mp3' o 'mp4'
 
         if not is_valid_url(url):
+            logger.error(f"url {url} invalido")
             self._show_dialog_error("El link no es un link de una red social valida.")
             return
 
         type_url = detect_url_type(url)
 
         if type_url == "unknown":
+            logger.error(f"url {url} de tipo desconocido")
             self._show_dialog_error("No se pudo determinar el tipo de URL.")
             return
 
@@ -88,11 +93,17 @@ class MainWindow(QMainWindow):
         format = self.ui.comboBox.currentText().lower()  # 'mp3' o 'mp4'
 
         if len(videos) == 0:
+            logger.error(
+                "Ocurrió un error al intentar obtener la información de la plalist"
+            )
             self._show_dialog_error(
                 "Ocurrió un error al intentar obtener la información de la plalist"
             )
             return
         elif len(videos) == 1 and not videos[0]:
+            logger.error(
+                "Ocurrió un error al intentar obtener la información del video"
+            )
             self._show_dialog_error(
                 "Ocurrió un error al intentar obtener la información del video"
             )
@@ -180,6 +191,7 @@ class MainWindow(QMainWindow):
         if msgBox.clickedButton() == buttonY:
             self._manager.cancel_all()
             self._db.close()
+            logger.info("Saliendo de aplicacion")
             event.accept()  # Cierra la ventana
         else:
             event.ignore()  # Cancela el cierre

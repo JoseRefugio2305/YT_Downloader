@@ -29,7 +29,7 @@ class DownloadQueue(QObject):
         scroll_area.setWidget(self.container)
 
     def add_item(self, download_id: int, title: str) -> None:
-        new_item = DownloadItem(download_id, title, self.container)
+        new_item = DownloadItem(download_id, title, self._db, self.container)
         new_item.cancel_requested.connect(
             lambda download_id: self._on_cancel_requested(download_id)
         )

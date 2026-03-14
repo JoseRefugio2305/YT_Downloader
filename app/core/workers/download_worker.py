@@ -10,7 +10,7 @@ class DownloadWorker(QThread):
     eta = Signal(str)  # "0:45"
     status_changed = Signal(str)  # 'downloading' | 'completed' | 'failed' | 'cancelled'
     error = Signal(str)  # mensaje de error
-    finished = Signal(int)  # emite el download_id al terminar
+    finished = Signal(int, str)  # emite el download_id y la ruta final al terminar
 
     def __init__(
         self,
@@ -31,29 +31,32 @@ class DownloadWorker(QThread):
         self.video_quality = video_quality or "bestvideo[height<=1080]+bestaudio/best"
         self.audio_quality = audio_quality or "0"
 
+        self._final_filepath = ""
+
     def run(self):
         try:
             downloader = Downloader(
                 self.destination,
                 self.format,
                 self._on_progress,
+                self._on_post_process,
                 video_quality=self.video_quality,
                 audio_quality=self.audio_quality,
             )
             downloader.download(self.url)
             if not self._cancelled:
                 self.status_changed.emit("completed")
-                self.finished.emit(self.download_id)
+                self.finished.emit(self.download_id, self._final_filepath)
             else:  # Si esta cancelado emitimos el estado
                 self.status_changed.emit("cancelled")
-                self.finished.emit(self.download_id)
+                self.finished.emit(self.download_id, "")
         except Exception as e:
             if self._cancelled:
                 self.status_changed.emit("cancelled")  # <- cancelación no es fallo
             else:
                 self.error.emit(str(e))
                 self.status_changed.emit("failed")
-            self.finished.emit(self.download_id)
+            self.finished.emit(self.download_id, "")
 
     def _on_progress(self, data: dict):
         try:
@@ -70,7 +73,7 @@ class DownloadWorker(QThread):
 
             total = data.get("total_bytes") or data.get("total_bytes_estimate") or 0
             if total:
-                porcentaje = int(data.get("downloaded_bytes",1000) * 100 / total)
+                porcentaje = int(data.get("downloaded_bytes", 1000) * 100 / total)
                 self.progress.emit(porcentaje)
             if data.get("speed"):
                 self.speed.emit(f"{format_file_size(data['speed'])}/s")
@@ -82,6 +85,13 @@ class DownloadWorker(QThread):
             self.status_changed.emit("failed")
             print(str(e))
             raise  # Relanzamos la excepcion para que run( ) la tome y el emita el finished
+
+    def _on_post_process(self, data: dict):
+        if data.get("status") != "finished":
+            return
+        
+        if data.get("postprocessor") == "MoveFiles":
+            self._final_filepath = data["info_dict"].get("filepath", "")
 
     def cancel(self):
         self._cancelled = True

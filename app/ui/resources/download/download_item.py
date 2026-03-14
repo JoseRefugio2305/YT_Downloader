@@ -7,11 +7,17 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QProgressBar,
+    QDialog,
+    QMessageBox,
     QWidget,
 )
+from pathlib import Path
+from pathvalidate import sanitize_filename
 
 from ....utils.text_helpers import get_status_color
 from ....core.workers.download_worker import DownloadWorker
+from ....database.db_manager import DBManager
+from ...resources.dialogs.rename_dialog import RenameDialog
 
 
 class DownloadItem(QWidget):
@@ -25,8 +31,9 @@ class DownloadItem(QWidget):
     STYLE_NORMAL = "background: #B0B0B0; border-radius: 10px;"
     STYLE_HOVER = "background: #909090; border-radius: 10px;"
 
-    def __init__(self, download_id: int, title: str, parent=None):
+    def __init__(self, download_id: int, title: str, db: DBManager, parent=None):
         super().__init__(parent)
+        self._db = db
         self._download_id = download_id
         self._worker = None
         self._title = title
@@ -154,6 +161,17 @@ class DownloadItem(QWidget):
             lambda: self.retry_requested.emit(self._download_id)
         )
         self.horizontalBtnActionsL.addWidget(self.btnRetry)
+        # Boton de renombrar archivo desde app
+        self.btnRename = QPushButton()
+        self.btnRename.setObjectName("btnRename")
+        self.btnRename.setText("Renombrar")
+        self.btnRename.setFont(font1)
+        self.btnRename.setStyleSheet(
+            "background-color : #064E6F; color : white; padding:5px; border-radius:10px;"
+        )
+        self.btnRename.setVisible(False)
+        self.btnRename.clicked.connect(self._on_rename_clicked)
+        self.horizontalBtnActionsL.addWidget(self.btnRename)
         # Boton de eliminar de la lista
         self.btnRemove = QPushButton()
         self.btnRemove.setObjectName("btnRemove")
@@ -187,6 +205,7 @@ class DownloadItem(QWidget):
         self.btnCancel.setVisible(status in ("downloading", "pending"))
         self.btnRetry.setVisible(status in ("failed", "cancelled"))
         self.btnRemove.setVisible(status in ("failed", "cancelled", "completed"))
+        self.btnRename.setVisible(status == "completed")
 
         if status in ("completed", "failed", "cancelled"):
             self._worker = None  # liberamos la referencia
@@ -200,6 +219,38 @@ class DownloadItem(QWidget):
         self._worker.speed.connect(self.update_speed)
         self._worker.eta.connect(self.update_eta)
         self._worker.status_changed.connect(self.update_status)
+
+    def _on_rename_clicked(self):
+        download = self._db.get_download_by_id(self._download_id)
+        current_path = Path(download.destination_path)
+        dialog = RenameDialog(
+            current_path.stem, self
+        )  # Con stem obtenemos el nombre sin extension
+
+        if dialog.exec() != QDialog.Accepted:  # Si no acepto
+            return
+        new_name = sanitize_filename(dialog.get_title(), "")
+        new_path = current_path.parent / f"{new_name}{current_path.suffix}"
+        if new_path.exists():
+            # Avisamos que ya existe un archivo con ese nombre
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("Ya existe un archivo con ese nombre en la carpeta de destino.")
+            msg.exec()
+            return
+
+        try:
+            current_path.rename(new_path)
+            self._title = new_name
+            self.lblTitulo.setText(new_name)
+            self._db.update_download_info(
+                self._download_id, title=new_name, destination_path=str(new_path)
+            )
+        except Exception as e:
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText(f"No se pudo renombrar el archivo: {e}")
+            msg.exec()
 
     # Eventos para simular el hover
     def enterEvent(self, event):

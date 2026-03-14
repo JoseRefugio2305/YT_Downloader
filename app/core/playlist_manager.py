@@ -138,9 +138,13 @@ class PlaylistManager(QObject):
 
         self.item_started.emit(new_worker["id"], self._workers[new_worker["id"]])
 
-    def _on_work_finished(self, download_id: int):
+    def _on_work_finished(self, download_id: int, final_path: str):
         self.item_finished.emit(download_id)
         self._workers.pop(download_id, None)  # Si no existe no da error
+        if final_path != "":
+            self._db.update_download_info(
+                download_id=download_id, destination_path=final_path
+            )
 
         # Revisamos si hay una playlist asiciada a la descarga
         playlist_id = self._db.get_playlist_id(download_id)

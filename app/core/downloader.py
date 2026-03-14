@@ -13,10 +13,14 @@ class Downloader:
         destination: str,
         format: str,
         progress_callback=None,
+        postprocess_callback=None,
         video_quality=None,
         audio_quality=None,
     ):
         callback = progress_callback if progress_callback else self._progress_hook
+        post_process_callback = (
+            postprocess_callback if postprocess_callback else self._progress_hook
+        )
         self.yt_dlp_info = {
             "quiet": True,
             "ignoreerrors": True,
@@ -29,9 +33,7 @@ class Downloader:
         self._audio_quality = audio_quality or Settings.get_audio_quality()
 
         self.yt_opts = self._build_opts(
-            destination,
-            format,
-            callback,
+            destination, format, callback, post_process_callback
         )
 
     # Metadata sin descargar
@@ -74,7 +76,9 @@ class Downloader:
     def _progress_hook(self, data: dict):
         print(data)
 
-    def _build_opts(self, destination: str, format: str, progress_callback) -> dict:
+    def _build_opts(
+        self, destination: str, format: str, progress_callback, postprocess_callback
+    ) -> dict:
         opts = {
             "retries": 3,
             "overwrites": False,  # Si existe el archivo no lo reescribimos
@@ -88,11 +92,7 @@ class Downloader:
             "quiet": False,
             "verbose": True,
             "no_warnings": False,
-            "postprocessor_hooks": [
-                lambda d: print(
-                    f"[PP Hook] status={d.get('status')} pp={d.get('postprocessor')}"
-                )
-            ],
+            "postprocessor_hooks": [postprocess_callback],
             "extractor_args": {
                 "youtube": {
                     "player_client": Settings.get_player_client()  # [ "tv_embedded",],  # usa clientes alternativos , "web", "android", "tv_embedded"

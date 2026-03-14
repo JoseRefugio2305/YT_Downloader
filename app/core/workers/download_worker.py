@@ -9,6 +9,7 @@ logger = get_logger(__name__)
 
 class DownloadWorker(QThread):
 
+    file_size = Signal(str)
     progress = Signal(int)  # porcentaje 0-100
     speed = Signal(str)  # "1.2 MB/s"
     eta = Signal(str)  # "0:45"
@@ -34,6 +35,8 @@ class DownloadWorker(QThread):
 
         self.video_quality = video_quality or "bestvideo[height<=1080]+bestaudio/best"
         self.audio_quality = audio_quality or "0"
+
+        self._size_emited = False
 
         self._final_filepath = ""
 
@@ -89,6 +92,7 @@ class DownloadWorker(QThread):
 
             total = data.get("total_bytes") or data.get("total_bytes_estimate") or 0
             if total:
+                self.file_size.emit(f"Tamaño estimado: {format_file_size(int(total))}")
                 porcentaje = int(data.get("downloaded_bytes", 1000) * 100 / total)
                 self.progress.emit(porcentaje)
             if data.get("speed"):

@@ -20,7 +20,8 @@ from ....database.db_manager import DBManager
 from ...resources.dialogs.rename_dialog import RenameDialog
 from ....core.logging.logger import get_logger
 
-logger=get_logger(__name__)
+logger = get_logger(__name__)
+
 
 class DownloadItem(QWidget):
     # Accion de cancelar y de reintentar
@@ -119,6 +120,11 @@ class DownloadItem(QWidget):
         self.lblETA.setFont(font2)
         self.lblETA.setText("00:00")
         self.horizontalInfoL.addWidget(self.lblETA)
+        self.lblFileSize = QLabel()
+        self.lblFileSize.setObjectName("lblFileSize")
+        self.lblFileSize.setFont(font2)
+        self.lblFileSize.setText("Tamaño estimado: 00 KB")
+        self.horizontalInfoL.addWidget(self.lblFileSize)
         self.lblStatus = QLabel()
         self.lblStatus.setObjectName("lblStatus")
         font3 = QFont()
@@ -195,6 +201,9 @@ class DownloadItem(QWidget):
         self.progressBar.setValue(percent)
         self.lblPercent.setText(f"{percent}%")
 
+    def update_file_size(self, size: str):
+        self.lblFileSize.setText(size)
+
     def update_speed(self, speed: str):
         self.lblSpeed.setText(speed)
 
@@ -221,6 +230,7 @@ class DownloadItem(QWidget):
         self._worker.speed.connect(self.update_speed)
         self._worker.eta.connect(self.update_eta)
         self._worker.status_changed.connect(self.update_status)
+        self._worker.file_size.connect(self.update_file_size)
 
     def _on_rename_clicked(self):
         download = self._db.get_download_by_id(self._download_id)
@@ -235,7 +245,9 @@ class DownloadItem(QWidget):
         new_path = current_path.parent / f"{new_name}{current_path.suffix}"
         if new_path.exists():
             # Avisamos que ya existe un archivo con ese nombre
-            logger.error("Ya existe un archivo con ese nombre en la carpeta de destino.")
+            logger.error(
+                "Ya existe un archivo con ese nombre en la carpeta de destino."
+            )
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setText("Ya existe un archivo con ese nombre en la carpeta de destino.")

@@ -140,10 +140,10 @@ class SettingsDialog(QDialog):
         self.combo_player_client = QComboBox()
         self.combo_player_client.setFont(font2)
         self.combo_player_client.addItem(
-            "TV (Mejor calidad de descarga)", ["tv_embedded"]
+            "Safari (Mejor calidad de descarga)", ["web_safari"]
         )
         self.combo_player_client.addItem("Web/Android", ["web", "android"])
-        self.combo_player_client.addItem("Todos", ["tv_embedded" "web", "android"])
+        self.combo_player_client.addItem("Todos", ["web_safari", "web", "android"])
         self.horizontalClientL.addWidget(self.lbl_client)
         self.horizontalClientL.addWidget(self.combo_player_client)
         self.layoutPrinc.addLayout(self.horizontalClientL)

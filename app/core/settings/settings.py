@@ -41,7 +41,8 @@ class SettingsApp:
 
     def get_player_client(self) -> List[str]:
         # Valores en la lista  "web", "android", "tv_embedded"
-        return self._settings.value("player_client", ["tv_embedded"], type=list)
+        #android_vr", "web_safari"
+        return self._settings.value("player_client", ["web_safari"], type=list)
 
     def get_theme(self) -> str:
         return self._settings.value("theme", "system", type=str)

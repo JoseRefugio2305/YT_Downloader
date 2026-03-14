@@ -4,6 +4,7 @@ from .workers.download_worker import DownloadWorker
 from ..database.db_manager import DBManager
 from ..database.models import Download, PlaylistDownload
 from .settings.settings import Settings
+from .notifications.notification import show_notification
 from .logging.logger import get_logger
 
 logger = get_logger(__name__)
@@ -155,7 +156,10 @@ class PlaylistManager(QObject):
             self._db.update_download_info(
                 download_id=download_id, destination_path=final_path
             )
-
+        download = self._db.get_download_by_id(download_id)
+        show_notification(
+            "Descarga Finalizada", f"Terminó la descarga del video {download.title}."
+        )
         # Revisamos si hay una playlist asociada a la descarga
         playlist_id = self._db.get_playlist_id(download_id)
         if playlist_id:
@@ -170,9 +174,11 @@ class PlaylistManager(QObject):
                 playlist.total_items > 0
                 and (failures + completed) >= playlist.total_items
             ):  # Si la suma de fallos y completados no es igual al total, entonces aun no termina, pero si es igual o mayor es que termino ya
+                show_notification(
+                    "Descarga Finalizada", "Terminó la descarga de la playlist."
+                )
                 final_status = "completed" if failures == 0 else "partial"
                 self._db.update_playlist_status(playlist_id, final_status)
-
         # Revisamos primero si hay delay aplicado, de haberlo se aplica antes de llamar a la seguiente descarga
         delay_ms = Settings.get_download_delay() * 1000
         if delay_ms > 0:

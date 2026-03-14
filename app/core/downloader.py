@@ -3,6 +3,7 @@ from typing import List, Optional, Tuple
 from pathlib import Path
 
 from .settings.settings import Settings
+from ..utils.format_helper import is_media_file,get_only_path
 from .logging.logger import get_logger
 
 logger = get_logger(__name__)
@@ -97,7 +98,7 @@ class Downloader:
             "overwrites": False,  # Si existe el archivo no lo reescribimos
             "fragment_retries": 3,
             "noplaylist": True,  # Evitamos  que descargue toda la playlist en el caso de que el link sea de un video sacada desde su playlist
-            "outtmpl": f"{destination}/%(title)s.%(ext)s",
+            
             "concurrent_fragment_downloads": 3,
             "continuedl": True,
             "progress_hooks": [progress_callback],
@@ -112,6 +113,15 @@ class Downloader:
                 }
             },
         }
+
+        #Revisamos el output del archivo
+        is_med_file=is_media_file(destination)
+        if is_med_file:
+            _,folder,_,file_name=get_only_path(destination)
+            opts["outtmpl"]= f"{folder}/{file_name}"
+        else:
+            opts["outtmpl"]= f"{destination}/%(title)s.%(ext)s"
+
 
         # Agregamos ratelimit
         speed_limit = Settings.get_speed_limit()

@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from pathlib import Path
 
 CHAR_PROHIB_REGEX = re.compile(r'[<>:"/\\|?*\x00-\x1F]')
 
@@ -29,3 +30,16 @@ def sanitize_filename(name: str, video_id: str) -> str:
     if new_name == "":
         new_name = f"{video_id}_{str(datetime.timestamp(datetime.now()))}"
     return new_name
+
+
+def is_media_file(path_str: str) -> bool:
+    return Path(path_str).suffix.lower() in (".mp4", ".mp3")
+
+
+def get_only_path(path_str: str) -> tuple[str, str, str]:
+    path = Path(path_str)
+    suffix = path.suffix
+    file_name = path.stem if suffix in (".mp4", ".mp3") else ""
+    folder = path.parent if file_name != "" else str(path)
+
+    return str(path), folder, suffix, file_name

@@ -224,8 +224,7 @@ class HistoryPanel(QObject):
         self.refresh()
 
     def _on_retry(self, download: Download):
-        self._queue.add_item(download.id, download.title)
-        self._queue._on_retry_requested(download.id)
+        self._queue.retry_from_history(download.id, download.title)
         self.refresh()
 
     def _on_search_history(self):

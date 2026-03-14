@@ -5,6 +5,9 @@ from .download_item import DownloadItem
 from ....database.db_manager import DBManager
 from ....core.playlist_manager import PlaylistManager
 from ....core.workers.download_worker import DownloadWorker
+from ....core.logging.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class DownloadQueue(QObject):
@@ -69,7 +72,20 @@ class DownloadQueue(QObject):
 
         self._playlist_manager.start_enqueue()
 
+    def retry_from_history(self, download_id: int, title: str):
+        if download_id in self._items:
+            logger.warning(
+                f"[DownloadQueue] Ya existe un item activo para id {download_id}"
+            )
+            self._on_remove_requested(download_id)
+            
+        self.add_item(download_id, title)
+        self._on_retry_requested(download_id)
+
     def _on_remove_requested(self, download_id: int):
+        if download_id not in self._items:
+            logger.warning(f"Remove ignorado, id {download_id} no existe")
+            return
         item = self._items.pop(download_id)
         self.layoutVItems.removeWidget(item)
         item.deleteLater()  # libera el widget de memoria

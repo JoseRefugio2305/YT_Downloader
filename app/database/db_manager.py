@@ -134,28 +134,39 @@ class DBManager:
         self,
         status: Optional[str] = None,
         txt_search: Optional[str] = None,
+        format: Optional[str] = None,
         limit=200,
         offset: int = 0,
     ):
+        values = [status, txt_search, format]
+        values_none = values.count(None)
         query = "SELECT * FROM downloads"
         params: list = []
 
-        if status or txt_search:
+        if values_none < 3:
             query += " WHERE "
 
         if status:
-            query += " status = ?"
+            query += " status = ? "
             params.append(status)
 
         if status and txt_search:
-            query+=" AND "
+            query += " AND "
 
         if txt_search:
-            txt_search=f"%{txt_search}%"
-            query += " LOWER(title) LIKE ?"
+            txt_search = f"%{txt_search}%"
+            query += " LOWER(title) LIKE ? "
             params.append(txt_search)
 
+        if format and (status or txt_search):
+            query += " AND "
+
+        if format:
+            query += " format = ? "
+            params.append(format)
+
         query += " ORDER BY COALESCE(playlist_id, id), playlist_id NULLS LAST, created_at DESC LIMIT ? OFFSET ?"
+
         params += [limit, offset]
         with self._connect() as conn:
             rows = conn.execute(query, params).fetchall()

@@ -60,11 +60,20 @@ class HistoryPanel(QObject):
         self._btn_clean_search.clicked.connect(self._on_clean_search)
         self._combo_status = self._widget_bus_hist.findChild(QComboBox, "comboStatus")
         # 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled'
+        self._combo_status.addItem("Todos", None)
         self._combo_status.addItem("Completado", "completed")
         self._combo_status.addItem("Pendiente", "pending")
         self._combo_status.addItem("Descargando", "downloading")
         self._combo_status.addItem("Cancelada", "cancelled")
         self._combo_status.addItem("Fallo", "failed")
+
+        self._combo_format = self._widget_bus_hist.findChild(
+            QComboBox, "comboFormatHist"
+        )
+        # 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled'
+        self._combo_format.addItem("Todos", None)
+        self._combo_format.addItem("MP4", "mp4")
+        self._combo_format.addItem("MP3", "mp3")
 
     def _setup_table(self):
         font = QFont()
@@ -147,7 +156,12 @@ class HistoryPanel(QObject):
         if is_search:
             txt_search = self._input_search.text().strip().lower()
             status = self._combo_status.currentData()
-            history = self._db.get_downloads(status=status, txt_search=txt_search)
+            format = self._combo_format.currentData()
+            history = self._db.get_downloads(
+                status=status,
+                txt_search=txt_search if txt_search != "" else None,
+                format=format,
+            )
         else:
             history = self._db.get_downloads()
         for download in history:
@@ -215,6 +229,7 @@ class HistoryPanel(QObject):
 
     def _on_clean_search(self):
         self._combo_status.setCurrentIndex(0)
+        self._combo_format.setCurrentIndex(0)
         self._input_search.setText("")
         self.refresh()
 

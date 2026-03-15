@@ -157,9 +157,19 @@ class PlaylistManager(QObject):
                 download_id=download_id, destination_path=final_path
             )
         download = self._db.get_download_by_id(download_id)
-        show_notification(
-            "Descarga Finalizada", f"Terminó la descarga del video {download.title}."
-        )
+        if download.status in ("failed", "completed"):
+            message = (
+                f"Terminó la descarga del video {download.title}."
+                if download.status == "completed"
+                else f"Ocurrió un error en la descarga del video {download.title}."
+            )
+            title_not = (
+                "Descarga Finalizada"
+                if download.status == "completed"
+                else "Error en Descarga"
+            )
+            show_notification(title_not, message)
+
         # Revisamos si hay una playlist asociada a la descarga
         playlist_id = self._db.get_playlist_id(download_id)
         if playlist_id:

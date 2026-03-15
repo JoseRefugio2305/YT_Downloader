@@ -11,7 +11,6 @@ def show_notification(titulo, mensaje):
     # Crear el icono en la bandeja
     tray = QSystemTrayIcon()
     icon = app.windowIcon()
-    print(icon)
     if icon.isNull():
         icon = app.style().standardIcon(QStyle.SP_ComputerIcon)
     tray.setIcon(icon)

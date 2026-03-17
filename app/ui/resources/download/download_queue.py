@@ -44,7 +44,7 @@ class DownloadQueue(QObject):
         )
 
         self._items[download_id] = new_item
-        self.layoutVItems.addWidget(new_item)
+        self.layoutVItems.insertWidget(0, new_item)
 
     def _on_cancel_requested(self, download_id: int):
         self._playlist_manager.cancel_item(download_id)

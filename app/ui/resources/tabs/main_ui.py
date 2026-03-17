@@ -122,6 +122,7 @@ class UIMainWindow(object):
         self.btnCancelAll.setObjectName("btnCancelAll")
         self.btnCancelAll.setGeometry(QRect(840, 170, 141, 41))
         self.btnCancelAll.setFont(font3)
+        self.btnCancelAll.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnCancelAll.setStyleSheet(
             "background-color: rgb(224, 22, 22);\n" "color: rgb(255, 255, 255);"
         )
@@ -129,6 +130,7 @@ class UIMainWindow(object):
         self.btnCleanAll.setObjectName("btnCleanAll")
         self.btnCleanAll.setGeometry(QRect(670, 170, 161, 41))
         self.btnCleanAll.setFont(font3)
+        self.btnCleanAll.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnCleanAll.setStyleSheet(
             "background-color: rgb(107, 114, 128);\n" "color: rgb(255, 255, 255);"
         )
@@ -152,6 +154,7 @@ class UIMainWindow(object):
         font5.setBold(True)
         font5.setItalic(False)
         self.btnSearchHistorial.setFont(font5)
+        self.btnSearchHistorial.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnSearchHistorial.setStyleSheet(
             "background-color: rgb(108, 9, 200);\n" "color: rgb(255, 255, 255);"
         )
@@ -163,6 +166,7 @@ class UIMainWindow(object):
         self.comboStatus.setObjectName("comboStatus")
         self.comboStatus.setGeometry(QRect(0, 10, 161, 40))
         self.comboStatus.setFont(font5)
+        self.comboStatus.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnLimpiarH = QPushButton(self.widgetBusHistorial)
         self.btnLimpiarH.setObjectName("btnLimpiarH")
         self.btnLimpiarH.setGeometry(QRect(780, 60, 191, 40))
@@ -174,6 +178,7 @@ class UIMainWindow(object):
         self.btnCleanSearch = QPushButton(self.widgetBusHistorial)
         self.btnCleanSearch.setObjectName("btnCleanSearch")
         self.btnCleanSearch.setGeometry(QRect(470, 60, 51, 40))
+        self.btnCleanSearch.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnCleanSearch.setStyleSheet(
             "background-color: rgb(108, 9, 200);\n" "color: rgb(255, 255, 255);"
         )
@@ -181,6 +186,7 @@ class UIMainWindow(object):
         self.comboFormatHist.setObjectName("comboFormatHist")
         self.comboFormatHist.setGeometry(QRect(170, 10, 151, 40))
         self.comboFormatHist.setFont(font5)
+        self.comboFormatHist.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.mainTab.addTab(self.tab_4, "")
 
         self.verticalLayout.addWidget(self.mainTab)

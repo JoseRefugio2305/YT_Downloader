@@ -1,5 +1,5 @@
 from PySide6.QtCore import QRect, QSize, Qt, Signal
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QCursor
 from PySide6.QtWidgets import (
     QLabel,
     QPushButton,
@@ -157,6 +157,7 @@ class DownloadItem(QWidget):
         self.btnCancel.setStyleSheet(
             "background-color : #E01616; color : white; padding:5px; border-radius:10px;"
         )
+        self.btnCancel.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnCancel.clicked.connect(self._on_cancel_clicked)
         self.horizontalBtnActionsL.addWidget(self.btnCancel)
         # Boton de Reintentar
@@ -167,6 +168,7 @@ class DownloadItem(QWidget):
         self.btnRetry.setStyleSheet(
             "background-color : #FC8A00; color : white; padding:5px; border-radius:10px;"
         )
+        self.btnRetry.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnRetry.setVisible(False)
         self.btnRetry.clicked.connect(
             lambda: self.retry_requested.emit(self._download_id)
@@ -177,6 +179,7 @@ class DownloadItem(QWidget):
         self.btnRename.setObjectName("btnRename")
         self.btnRename.setText("Renombrar")
         self.btnRename.setFont(font1)
+        self.btnRename.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnRename.setStyleSheet(
             "background-color : #064E6F; color : white; padding:5px; border-radius:10px;"
         )
@@ -188,6 +191,7 @@ class DownloadItem(QWidget):
         self.btnRemove.setObjectName("btnRemove")
         self.btnRemove.setText("X")
         self.btnRemove.setFont(font1)
+        self.btnRemove.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.btnRemove.setStyleSheet(
             "background-color : #6B7280; color : white; padding:10px; border-radius:10px;"
         )

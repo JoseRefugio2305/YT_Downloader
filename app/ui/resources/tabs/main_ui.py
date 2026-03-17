@@ -1,39 +1,7 @@
-from PySide6.QtCore import (
-    QCoreApplication,
-    QDate,
-    QDateTime,
-    QLocale,
-    QMetaObject,
-    QObject,
-    QPoint,
-    QRect,
-    QSize,
-    QTime,
-    QUrl,
-    Qt,
-)
-from PySide6.QtGui import (
-    QBrush,
-    QColor,
-    QConicalGradient,
-    QCursor,
-    QFont,
-    QFontDatabase,
-    QGradient,
-    QIcon,
-    QImage,
-    QKeySequence,
-    QLinearGradient,
-    QPainter,
-    QPalette,
-    QPixmap,
-    QRadialGradient,
-    QTransform,
-)
+from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
+from PySide6.QtGui import QCursor, QFont, QIcon, QPixmap
 from PySide6.QtWidgets import (
-    QApplication,
     QComboBox,
-    QHeaderView,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -41,7 +9,6 @@ from PySide6.QtWidgets import (
     QSizePolicy,
     QTabWidget,
     QTableWidget,
-    QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
@@ -151,6 +118,20 @@ class UIMainWindow(object):
         self.btn_settings.setStyleSheet(
             "background-color: rgb(108, 9, 200);\n" "color: rgb(255, 255, 255);"
         )
+        self.btnCancelAll = QPushButton(self.tab_3)
+        self.btnCancelAll.setObjectName("btnCancelAll")
+        self.btnCancelAll.setGeometry(QRect(840, 170, 141, 41))
+        self.btnCancelAll.setFont(font3)
+        self.btnCancelAll.setStyleSheet(
+            "background-color: rgb(224, 22, 22);\n" "color: rgb(255, 255, 255);"
+        )
+        self.btnCleanAll = QPushButton(self.tab_3)
+        self.btnCleanAll.setObjectName("btnCleanAll")
+        self.btnCleanAll.setGeometry(QRect(670, 170, 161, 41))
+        self.btnCleanAll.setFont(font3)
+        self.btnCleanAll.setStyleSheet(
+            "background-color: rgb(107, 114, 128);\n" "color: rgb(255, 255, 255);"
+        )
         self.mainTab.addTab(self.tab_3, "")
         self.tab_4 = QWidget()
         self.tab_4.setObjectName("tab_4")
@@ -236,6 +217,12 @@ class UIMainWindow(object):
 
         self.btn_settings.setText(
             QCoreApplication.translate("Form", "\u2699\ufe0f", None)
+        )
+        self.btnCancelAll.setText(
+            QCoreApplication.translate("Form", "Cancelar Todas", None)
+        )
+        self.btnCleanAll.setText(
+            QCoreApplication.translate("Form", "Limpiar Descargas", None)
         )
         self.mainTab.setTabText(
             self.mainTab.indexOf(self.tab_3),

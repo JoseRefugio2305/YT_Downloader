@@ -14,9 +14,10 @@ class PlaylistManager(QObject):
     item_finished = Signal(int)  # download_id
     item_failed = Signal(int, str)  # download_id, error message
     all_finished = Signal()
-    item_started = Signal(
-        int, DownloadWorker
-    )  # Con este signal controlamos cuando un worker es iniciado en las descargas
+    # Con este signal controlamos cuando un worker es iniciado en las descargas
+    item_started = Signal(int, DownloadWorker)
+    # Cuando el item es cancelado y aun estaba en cola de espera
+    item_queue_cancelled = Signal(int)
 
     def __init__(self, db: DBManager, max_concurrent: int = 2):
         super().__init__()
@@ -99,6 +100,8 @@ class PlaylistManager(QObject):
             if self._queue[eq]["id"] == download_id:
                 self._queue.pop(eq)
                 self._db.update_downloaded_status(download_id, "cancelled")
+                self.item_queue_cancelled.emit(download_id)  # emitimos la señal
+                return
 
     def cancel_all(self) -> None:
         logger.info("Cancelando todos en playlist_manager")
@@ -107,9 +110,9 @@ class PlaylistManager(QObject):
             worker.cancel()
         # vaciamos lista de espera
         for el in self._queue:
-            self._db.update_downloaded_status(
-                el["id"], "cancelled"
-            )  # Actualizamos todos los pendientes a cancelados
+            # Actualizamos todos los pendientes a cancelados
+            self._db.update_downloaded_status(el["id"], "cancelled")
+            self.item_queue_cancelled.emit(el["id"])
         self._queue = []
 
     def get_worker(self, download_id: int) -> DownloadWorker | None:

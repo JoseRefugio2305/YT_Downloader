@@ -20,9 +20,12 @@ class DownloadQueue(QObject):
         self._items: dict[int, DownloadItem] = (
             {}
         )  # Todos los items de cada descarga, el id sera el download_id
-        self._playlist_manager.item_started.connect(
-            self._on_item_started
-        )  # Conectamos a la se;al de cuando se inicia un worker
+        # Conectamos a la senal de cuando se inicia un worker
+        self._playlist_manager.item_started.connect(self._on_item_started)
+        # Senal para cuando un elemnto en cola es cancelado
+        self._playlist_manager.item_queue_cancelled.connect(
+            self._on_queue_item_cancelled
+        )
         self._setup_scroll(scroll_area)
 
     def _setup_scroll(self, scroll_area: QScrollArea):
@@ -78,7 +81,7 @@ class DownloadQueue(QObject):
                 f"[DownloadQueue] Ya existe un item activo para id {download_id}"
             )
             self._on_remove_requested(download_id)
-            
+
         self.add_item(download_id, title)
         self._on_retry_requested(download_id)
 
@@ -89,6 +92,21 @@ class DownloadQueue(QObject):
         item = self._items.pop(download_id)
         self.layoutVItems.removeWidget(item)
         item.deleteLater()  # libera el widget de memoria
+
+    def _on_queue_item_cancelled(self, download_id: int):
+        item = self._items.get(download_id)
+        if item:
+            item.update_status("cancelled")
+
+    def _on_clear_finished(self) -> None:
+        finished_states = ("completed", "failed", "cancelled")
+        to_remove = [
+            download_id
+            for download_id, item in self._items.items()
+            if item.current_status in finished_states
+        ]
+        for download_id in to_remove:
+            self._on_remove_requested(download_id)
 
     def _on_item_started(self, download_id: int, worker: DownloadWorker):
         if download_id in self._items:

@@ -257,6 +257,54 @@ color: rgb(255, 255, 255);</string>
          <string>⚙️</string>
         </property>
        </widget>
+       <widget class="QPushButton" name="btnCancelAll">
+        <property name="geometry">
+         <rect>
+          <x>840</x>
+          <y>170</y>
+          <width>141</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(224, 22, 22);
+color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string>Cancelar Todas</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="btnCleanAll">
+        <property name="geometry">
+         <rect>
+          <x>670</x>
+          <y>170</y>
+          <width>161</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>13</pointsize>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(107, 114, 128);
+color: rgb(255, 255, 255);</string>
+        </property>
+        <property name="text">
+         <string>Limpiar Descargas</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">

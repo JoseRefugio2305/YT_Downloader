@@ -40,7 +40,12 @@ class DownloadItem(QWidget):
         self._download_id = download_id
         self._worker = None
         self._title = title
+        self._status = "pending"
         self._setup_ui()
+
+    @property
+    def current_status(self) -> str:
+        return self._status
 
     def _setup_ui(self):
         self.resize(700, 650)
@@ -211,6 +216,7 @@ class DownloadItem(QWidget):
         self.lblETA.setText(eta)
 
     def update_status(self, status: str):
+        self._status = status
         self.lblStatus.setText(status)
         self.lblStatus.setStyleSheet(f"color:{get_status_color(status)};")
         self.btnCancel.setVisible(status in ("downloading", "pending"))

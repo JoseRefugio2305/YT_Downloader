@@ -26,10 +26,12 @@ class MainWindow(QMainWindow):
         self.ui.btnDownload.clicked.connect(self._on_download_clicked)
         self.ui.btn_settings.clicked.connect(self._open_settings)
         self.ui.btnPasteLink.clicked.connect(self._on_paste_clicked)
+        self.ui.btnCancelAll.clicked.connect(self._on_cancel_all_clicked)
         self._settings = SettingsDialog(self)
         self._db = DBManager()
         self._manager = PlaylistManager(self._db)
         self._queue = DownloadQueue(self.ui.scrollDownloads, self._manager, self._db)
+        self.ui.btnCleanAll.clicked.connect(self._queue._on_clear_finished)
         self._history = HistoryPanel(
             self.ui.tableHistorial, self.ui.widgetBusHistorial, self._queue, self._db
         )
@@ -87,6 +89,9 @@ class MainWindow(QMainWindow):
         )  # Despues de 100 mls ejecutamos extractworker para dar tiempo a que se muestre el dialog de carga
         self._loading.show()
         self._loading.exec()
+
+    def _on_cancel_all_clicked(self):
+        self._manager.cancel_all()
 
     def _on_info_extracted(self, playlist_info: Optional[dict], videos: list):
         destination = Settings.get_destination()

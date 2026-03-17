@@ -2,8 +2,10 @@
 myvenv
 data/*
 ffmpeg/*
+node/*
 !data/.gitkeep
 !ffmpeg/.gitkeep
+!node/.gitkeep
 tests/
 dist/
 logs/

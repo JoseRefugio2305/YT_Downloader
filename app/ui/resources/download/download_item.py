@@ -157,9 +157,7 @@ class DownloadItem(QWidget):
         self.btnCancel.setStyleSheet(
             "background-color : #E01616; color : white; padding:5px; border-radius:10px;"
         )
-        self.btnCancel.clicked.connect(
-            lambda: self.cancel_requested.emit(self._download_id)
-        )
+        self.btnCancel.clicked.connect(self._on_cancel_clicked)
         self.horizontalBtnActionsL.addWidget(self.btnCancel)
         # Boton de Reintentar
         self.btnRetry = QPushButton()
@@ -273,6 +271,35 @@ class DownloadItem(QWidget):
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setText(f"No se pudo renombrar el archivo: {str(e)}")
             msg.exec()
+
+    def _on_cancel_clicked(self):
+        msgBox = QMessageBox(self)
+        msgBox.setIcon(QMessageBox.Icon.Question)
+        msgBox.setStyleSheet("QLineEdit { background-color: palette(base);}")
+        msgBox.setWindowTitle("Confirmar Cancelación")
+        msgBox.setText(
+            f"¿Estás seguro de que deseas CANCELAR la descarga de {self._title}?"
+        )
+        msgBox.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        buttonY = msgBox.button(QMessageBox.StandardButton.Yes)
+        buttonY.setText("Si")
+        buttonY.setStyleSheet(
+            "background-color : #064E6F; color : white; padding:5px; border-radius:10px;"
+        )
+
+        buttonN = msgBox.button(QMessageBox.StandardButton.No)
+        buttonN.setText("No")
+        buttonN.setStyleSheet(
+            "background-color : #525252; color : white; padding:5px; border-radius:10px;"
+        )
+
+        ret = msgBox.exec()
+
+        if msgBox.clickedButton() == buttonY:
+            self.cancel_requested.emit(self._download_id)
 
     # Eventos para simular el hover
     def enterEvent(self, event):

@@ -91,7 +91,26 @@ class MainWindow(QMainWindow):
         self._loading.exec()
 
     def _on_cancel_all_clicked(self):
-        self._manager.cancel_all()
+        msgBox = QMessageBox(self)
+        msgBox.setIcon(QMessageBox.Icon.Question)
+        msgBox.setWindowTitle("Confirmar Cancelación")
+        msgBox.setText(
+            "¿Estás seguro de que deseas CANCELAR todas las descargas activas?"
+        )
+        msgBox.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+
+        buttonY = msgBox.button(QMessageBox.StandardButton.Yes)
+        buttonY.setText("Si")
+
+        buttonN = msgBox.button(QMessageBox.StandardButton.No)
+        buttonN.setText("No")
+
+        ret = msgBox.exec()
+
+        if msgBox.clickedButton() == buttonY:
+            self._manager.cancel_all()
 
     def _on_info_extracted(self, playlist_info: Optional[dict], videos: list):
         destination = Settings.get_destination()

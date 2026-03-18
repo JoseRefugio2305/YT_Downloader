@@ -6,6 +6,7 @@ from ..database.models import Download, PlaylistDownload
 from .settings.settings import Settings
 from .notifications.notification import show_notification
 from .logging.logger import get_logger
+import app.utils.constants as C
 
 logger = get_logger(__name__)
 
@@ -19,7 +20,7 @@ class PlaylistManager(QObject):
     # Cuando el item es cancelado y aun estaba en cola de espera
     item_queue_cancelled = Signal(int)
 
-    def __init__(self, db: DBManager, max_concurrent: int = 2):
+    def __init__(self, db: DBManager, max_concurrent: int = C.DEFAULT_MAX_CONCURRENT):
         super().__init__()
         self._db = db
         self._workers: dict[int, DownloadWorker] = {}  # Descargas activas
@@ -49,7 +50,7 @@ class PlaylistManager(QObject):
                         url=playlist_url,
                         title=playlist_title,
                         format=format,
-                        status="pending",
+                        status=C.STATUS_PENDING,
                         destination_path=destination,
                         yt_id=yt_playlist_id,
                         total_items=playlist_t_items,
@@ -63,7 +64,7 @@ class PlaylistManager(QObject):
                 url=url,
                 title=title,
                 format=format,
-                status="pending",
+                status=C.STATUS_PENDING,
                 destination_path=destination,
                 playlist_id=playlist_id,
                 yt_id=yt_id,
@@ -77,7 +78,7 @@ class PlaylistManager(QObject):
                 "url": url,
                 "destination": destination,
                 "format": format,
-                "status": "pending",
+                "status": C.STATUS_PENDING,
             }
         )
 
@@ -99,7 +100,7 @@ class PlaylistManager(QObject):
         for eq in range(0, len(self._queue)):  # Buscamos si esta en la cola de espera
             if self._queue[eq]["id"] == download_id:
                 self._queue.pop(eq)
-                self._db.update_downloaded_status(download_id, "cancelled")
+                self._db.update_downloaded_status(download_id, C.STATUS_CANCELLED)
                 self.item_queue_cancelled.emit(download_id)  # emitimos la señal
                 return
 
@@ -111,7 +112,7 @@ class PlaylistManager(QObject):
         # vaciamos lista de espera
         for el in self._queue:
             # Actualizamos todos los pendientes a cancelados
-            self._db.update_downloaded_status(el["id"], "cancelled")
+            self._db.update_downloaded_status(el["id"], C.STATUS_CANCELLED)
             self.item_queue_cancelled.emit(el["id"])
         self._queue = []
 
@@ -142,7 +143,7 @@ class PlaylistManager(QObject):
         )
         self._workers[new_worker["id"]].error.connect(
             lambda error: self._db.update_downloaded_status(
-                new_worker["id"], "failed", error
+                new_worker["id"], C.STATUS_FAILED, error
             )
         )
         self._workers[new_worker["id"]].finished.connect(self._on_work_finished)
@@ -160,15 +161,15 @@ class PlaylistManager(QObject):
                 download_id=download_id, destination_path=final_path
             )
         download = self._db.get_download_by_id(download_id)
-        if download.status in ("failed", "completed"):
+        if download.status in (C.STATUS_FAILED, C.STATUS_COMPLETED):
             message = (
                 f"Terminó la descarga del video {download.title}."
-                if download.status == "completed"
+                if download.status == C.STATUS_COMPLETED
                 else f"Ocurrió un error en la descarga del video {download.title}."
             )
             title_not = (
                 "Descarga Finalizada"
-                if download.status == "completed"
+                if download.status == C.STATUS_COMPLETED
                 else "Error en Descarga"
             )
             show_notification(title_not, message)
@@ -180,9 +181,9 @@ class PlaylistManager(QObject):
             downloads = self._db.get_downloads_by_playlist(playlist_id)
             # Calculamos fallos y completadas con exito
             failures = len(
-                [d for d in downloads if d.status in ("failed", "cancelled")]
+                [d for d in downloads if d.status in C.STATUS_RETRYABLE]
             )
-            completed = len([d for d in downloads if d.status == "completed"])
+            completed = len([d for d in downloads if d.status == C.STATUS_COMPLETED])
             if (
                 playlist.total_items > 0
                 and (failures + completed) >= playlist.total_items
@@ -190,7 +191,7 @@ class PlaylistManager(QObject):
                 show_notification(
                     "Descarga Finalizada", "Terminó la descarga de la playlist."
                 )
-                final_status = "completed" if failures == 0 else "partial"
+                final_status = C.STATUS_COMPLETED if failures == 0 else C.STATUS_PARTIAL
                 self._db.update_playlist_status(playlist_id, final_status)
         # Revisamos primero si hay delay aplicado, de haberlo se aplica antes de llamar a la seguiente descarga
         delay_ms = Settings.get_download_delay() * 1000

@@ -1,14 +1,17 @@
+import app.utils.constants as C
+
+
 def get_status_color(status: str) -> str:
     color = ""
     match status:
-        case "downloading":
-            color = "#3B82F6"
-        case "completed":
-            color = "#2C9F4B"
-        case "failed":
-            color = "#EF4444"
-        case "cancelled":
-            color = "#F59E0B"
+        case C.STATUS_DOWNLOADING:
+            color = C.STATUS_COLORS[C.STATUS_DOWNLOADING]
+        case C.STATUS_COMPLETED:
+            color = C.STATUS_COLORS[C.STATUS_COMPLETED]
+        case C.STATUS_FAILED:
+            color = C.STATUS_COLORS[C.STATUS_FAILED]
+        case C.STATUS_CANCELLED:
+            color = C.STATUS_COLORS[C.STATUS_CANCELLED]
         case _:  # pending actua como default
-            color = "#000000"
+            color = C.STATUS_COLORS[C.STATUS_PENDING]
     return color

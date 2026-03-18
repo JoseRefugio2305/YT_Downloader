@@ -19,6 +19,7 @@ from ....core.workers.download_worker import DownloadWorker
 from ....database.db_manager import DBManager
 from ...resources.dialogs.rename_dialog import RenameDialog
 from ....core.logging.logger import get_logger
+import app.utils.constants as C
 
 logger = get_logger(__name__)
 
@@ -40,7 +41,7 @@ class DownloadItem(QWidget):
         self._download_id = download_id
         self._worker = None
         self._title = title
-        self._status = "pending"
+        self._status = C.STATUS_PENDING
         self._setup_ui()
 
     @property
@@ -221,12 +222,12 @@ class DownloadItem(QWidget):
         self._status = status
         self.lblStatus.setText(status)
         self.lblStatus.setStyleSheet(f"color:{get_status_color(status)};")
-        self.btnCancel.setVisible(status in ("downloading", "pending"))
-        self.btnRetry.setVisible(status in ("failed", "cancelled"))
-        self.btnRemove.setVisible(status in ("failed", "cancelled", "completed"))
-        self.btnRename.setVisible(status == "completed")
+        self.btnCancel.setVisible(status in C.STATUS_ACTIVE)
+        self.btnRetry.setVisible(status in C.STATUS_RETRYABLE)
+        self.btnRemove.setVisible(status in C.STATUS_FINISHED)
+        self.btnRename.setVisible(status == C.STATUS_COMPLETED)
 
-        if status in ("completed", "failed", "cancelled"):
+        if status in C.STATUS_FAILED:
             self._worker = None  # liberamos la referencia
 
     def assign_worker(self, worker: DownloadWorker):

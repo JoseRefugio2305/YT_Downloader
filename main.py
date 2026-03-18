@@ -7,7 +7,7 @@ from pathlib import Path
 from app.database.db_manager import DBManager
 from app.ui.main_window import MainWindow
 from app.core.settings.settings import Settings
-from app.utils.constants import THEME_SCHEME
+import app.utils.constants as C
 from app.core.logging.logger import get_logger
 
 logger = get_logger(__name__)
@@ -25,7 +25,7 @@ def main():
     _set_up_env()
     app = QApplication(sys.argv)
 
-    scheme = THEME_SCHEME.get(Settings.get_theme(), Qt.ColorScheme.Unknown)
+    scheme = C.THEME_SCHEME.get(Settings.get_theme(), Qt.ColorScheme.Unknown)
     app.styleHints().setColorScheme(scheme)
     window = MainWindow()
     window.show()

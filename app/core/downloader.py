@@ -6,6 +6,7 @@ from .settings.settings import Settings
 from ..utils.format_helper import is_media_file, get_only_path
 from .logging.yt_dlp_logger import YtDlpLogger
 from .logging.logger import get_logger
+import app.utils.constants as C
 
 logger = get_logger(__name__)
 logger_yt_dlp = YtDlpLogger(get_logger("[YT-DLP]"))
@@ -130,7 +131,7 @@ class Downloader:
         if speed_limit:
             opts["ratelimit"] = speed_limit
 
-        if format == "mp3":
+        if format == C.FORMAT_MP3:
             opts.update(
                 {
                     "format": "bestaudio/best",
@@ -140,7 +141,7 @@ class Downloader:
                     "postprocessors": [
                         {
                             "key": "FFmpegExtractAudio",
-                            "preferredcodec": "mp3",
+                            "preferredcodec": C.FORMAT_MP3,
                             "preferredquality": self._audio_quality,
                         },
                         {
@@ -158,7 +159,7 @@ class Downloader:
                     "ffmpeg_location": str(self.FFMPEG_DIR),
                     "prefer_ffmpeg": True,
                     "format": self._video_quality,
-                    "merge_output_format": "mp4",
+                    "merge_output_format": C.FORMAT_MP4,
                 }
             )
         return opts

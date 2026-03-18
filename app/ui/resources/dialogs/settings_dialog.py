@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from ....core.settings.settings import Settings
-from ....utils.constants import THEME_SCHEME
+import app.utils.constants as C
 
 
 class SettingsDialog(QDialog):
@@ -83,7 +83,7 @@ class SettingsDialog(QDialog):
         self.combo_vid_qual.setObjectName("combo_vid_qual")
         self.combo_vid_qual.setFont(font2)
         self.combo_vid_qual.addItem("Mejor Calidad", "bestvideo+bestaudio/best")
-        self.combo_vid_qual.addItem("1080p", "bestvideo[height<=1080]+bestaudio/best")
+        self.combo_vid_qual.addItem("1080p", C.DEFAULT_VIDEO_QUALITY)
         self.combo_vid_qual.addItem("720p", "bestvideo[height<=720]+bestaudio/best")
         self.combo_vid_qual.addItem("480p", "bestvideo[height<=480]+bestaudio/best")
         self.combo_vid_qual.addItem("360p", "bestvideo[height<=360]+bestaudio/best")
@@ -99,7 +99,7 @@ class SettingsDialog(QDialog):
         self.combo_aud_qual = QComboBox()
         self.combo_aud_qual.setObjectName("combo_aud_qual")
         self.combo_aud_qual.setFont(font2)
-        self.combo_aud_qual.addItem("Mejor Calidad", "0")
+        self.combo_aud_qual.addItem("Mejor Calidad", C.DEFAULT_AUDIO_QUALITY)
         self.combo_aud_qual.addItem("Ata", "2")
         self.combo_aud_qual.addItem("Media", "5")
         self.combo_aud_qual.addItem("Baja", "7")
@@ -140,7 +140,7 @@ class SettingsDialog(QDialog):
         self.combo_player_client = QComboBox()
         self.combo_player_client.setFont(font2)
         self.combo_player_client.addItem(
-            "Safari (Mejor calidad de descarga)", ["web_safari"]
+            "Safari (Mejor calidad de descarga)", C.DEFAULT_PLAYER_CLIENT
         )
         self.combo_player_client.addItem("Web/Android", ["web", "android"])
         self.combo_player_client.addItem("Todos", ["web_safari", "web", "android"])
@@ -159,7 +159,7 @@ class SettingsDialog(QDialog):
         self.combo_theme = QComboBox()
         self.combo_theme.setObjectName("combo_theme")
         self.combo_theme.setFont(font2)
-        self.combo_theme.addItem("Sistema", "system")
+        self.combo_theme.addItem("Sistema", C.DEFAULT_THEME)
         self.combo_theme.addItem("Claro", "light")
         self.combo_theme.addItem("Oscuro", "dark")
         self.horizontalThemeL.addWidget(self.lbl_theme)
@@ -191,23 +191,31 @@ class SettingsDialog(QDialog):
             self.lbl_dest_sel.setText(folder)
 
     def _apply_settings(self):
-        Settings._settings.setValue("destination", self.lbl_dest_sel.text())
-        Settings._settings.setValue("max_concurrent", self.spin_num_descargas.value())
-        Settings._settings.setValue("max_vid_qual", self.combo_vid_qual.currentData())
-        Settings._settings.setValue("max_aud_qual", self.combo_aud_qual.currentData())
-        Settings._settings.setValue("speed_limit", self.combo_speed.currentData())
-        Settings._settings.setValue("download_delay", self.spin_delay.value())
+        Settings._settings.setValue(C.SETTING_DESTINATION, self.lbl_dest_sel.text())
         Settings._settings.setValue(
-            "player_client", self.combo_player_client.currentData()
+            C.SETTING_MAX_CONCURRENT, self.spin_num_descargas.value()
+        )
+        Settings._settings.setValue(
+            C.SETTING_VIDEO_QUALITY, self.combo_vid_qual.currentData()
+        )
+        Settings._settings.setValue(
+            C.SETTING_AUDIO_QUALITY, self.combo_aud_qual.currentData()
+        )
+        Settings._settings.setValue(
+            C.SETTING_SPEED_LIMIT, self.combo_speed.currentData()
+        )
+        Settings._settings.setValue(C.SETTING_DOWNLOAD_DELAY, self.spin_delay.value())
+        Settings._settings.setValue(
+            C.SETTING_PLAYER_CLIENT, self.combo_player_client.currentData()
         )
         self._apply_theme()
         self.accept()
 
     def _apply_theme(self):
         selected_theme = self.combo_theme.currentData()
-        Settings._settings.setValue("theme", selected_theme)
+        Settings._settings.setValue(C.SETTING_THEME, selected_theme)
         app = QApplication.instance()
-        app.styleHints().setColorScheme(THEME_SCHEME[selected_theme])
+        app.styleHints().setColorScheme(C.THEME_SCHEME[selected_theme])
 
     def _load_settings(self):
         self.lbl_dest_sel.setText(str(Settings.get_destination()))

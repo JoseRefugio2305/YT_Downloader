@@ -2,6 +2,7 @@ from PySide6.QtCore import QThread, Signal
 
 from ..downloader import Downloader
 from ..logging.logger import get_logger
+import app.utils.constants as C
 
 logger = get_logger(__name__)
 
@@ -25,8 +26,8 @@ class ExtractInfoWorker(QThread):
         self.format = format
         self.url_type = url_type
 
-        self.video_quality = video_quality or "bestvideo[height<=1080]+bestaudio/best"
-        self.audio_quality = audio_quality or "0"
+        self.video_quality = video_quality or C.DEFAULT_VIDEO_QUALITY
+        self.audio_quality = audio_quality or C.DEFAULT_AUDIO_QUALITY
 
     def run(self):
         try:

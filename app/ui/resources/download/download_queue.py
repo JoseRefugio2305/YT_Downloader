@@ -6,6 +6,7 @@ from ....database.db_manager import DBManager
 from ....core.playlist_manager import PlaylistManager
 from ....core.workers.download_worker import DownloadWorker
 from ....core.logging.logger import get_logger
+import app.utils.constants as C
 
 logger = get_logger(__name__)
 
@@ -96,10 +97,10 @@ class DownloadQueue(QObject):
     def _on_queue_item_cancelled(self, download_id: int):
         item = self._items.get(download_id)
         if item:
-            item.update_status("cancelled")
+            item.update_status(C.STATUS_CANCELLED)
 
     def _on_clear_finished(self) -> None:
-        finished_states = ("completed", "failed", "cancelled")
+        finished_states = (C.STATUS_COMPLETED, C.STATUS_FAILED, C.STATUS_CANCELLED)
         to_remove = [
             download_id
             for download_id, item in self._items.items()

@@ -3,6 +3,7 @@ from PySide6.QtCore import QThread, Signal
 from ..downloader import Downloader
 from ...utils.format_helper import format_file_size, format_duration
 from ..logging.logger import get_logger
+import app.utils.constants as C
 
 logger = get_logger(__name__)
 
@@ -33,8 +34,8 @@ class DownloadWorker(QThread):
         self.destination = destination
         self.download_id = download_id
 
-        self.video_quality = video_quality or "bestvideo[height<=1080]+bestaudio/best"
-        self.audio_quality = audio_quality or "0"
+        self.video_quality = video_quality or C.DEFAULT_VIDEO_QUALITY
+        self.audio_quality = audio_quality or C.DEFAULT_AUDIO_QUALITY
 
         self._size_emited = False
 
@@ -58,23 +59,23 @@ class DownloadWorker(QThread):
                 logger.info(
                     f"DownloadWorker con id {self.download_id} y url {self.url} completado en ruta {self._final_filepath}"
                 )
-                self.status_changed.emit("completed")
+                self.status_changed.emit(C.STATUS_COMPLETED)
                 self.finished.emit(self.download_id, self._final_filepath)
             else:  # Si esta cancelado emitimos el estado
                 logger.info(
                     f"DownloadWorker con id {self.download_id} y url {self.url} cancelado"
                 )
-                self.status_changed.emit("cancelled")
+                self.status_changed.emit(C.STATUS_CANCELLED)
                 self.finished.emit(self.download_id, "")
         except Exception as e:
             logger.error(
                 f"DownloadWorker con id {self.download_id} y url {self.url} error: {str(e)}"
             )
             if self._cancelled:
-                self.status_changed.emit("cancelled")  # <- cancelación no es fallo
+                self.status_changed.emit(C.STATUS_CANCELLED)  # <- cancelación no es fallo
             else:
                 self.error.emit(str(e))
-                self.status_changed.emit("failed")
+                self.status_changed.emit(C.STATUS_FAILED)
             self.finished.emit(self.download_id, "")
 
     def _on_progress(self, data: dict):
@@ -84,11 +85,11 @@ class DownloadWorker(QThread):
 
             # Mapeamos los status de yt-dlp a los nuestros
             status_map = {
-                "downloading": "downloading",
-                "finished": "downloading",  # fragmento terminado, aun no es completed
-                "error": "failed",
+                "downloading": C.STATUS_DOWNLOADING,
+                "finished": C.STATUS_DOWNLOADING,  # fragmento terminado, aun no es completed
+                "error": C.STATUS_FAILED,
             }
-            status = status_map.get(data.get("status", ""), "downloading")
+            status = status_map.get(data.get("status", ""), C.STATUS_DOWNLOADING)
 
             total = data.get("total_bytes") or data.get("total_bytes_estimate") or 0
             if total:
@@ -102,7 +103,7 @@ class DownloadWorker(QThread):
             self.status_changed.emit(status)
         except Exception as e:
             self.error.emit("Error al descargar.")
-            self.status_changed.emit("failed")
+            self.status_changed.emit(C.STATUS_FAILED)
             logger.error(
                 f"DownloadWorker con id {self.download_id} y url {self.url} con error el _on_progress error: {str(e)}"
             )

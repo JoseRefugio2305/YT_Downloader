@@ -18,6 +18,7 @@ from ....database.db_manager import DBManager
 from ....database.models import Download
 from ....utils.text_helpers import get_status_color
 from ....core.logging.logger import get_logger
+import app.utils.constants as C
 
 logger = get_logger(__name__)
 
@@ -64,19 +65,19 @@ class HistoryPanel(QObject):
         self._combo_status = self._widget_bus_hist.findChild(QComboBox, "comboStatus")
         # 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled'
         self._combo_status.addItem("Todos", None)
-        self._combo_status.addItem("Completado", "completed")
-        self._combo_status.addItem("Pendiente", "pending")
-        self._combo_status.addItem("Descargando", "downloading")
-        self._combo_status.addItem("Cancelada", "cancelled")
-        self._combo_status.addItem("Fallo", "failed")
+        self._combo_status.addItem("Completado", C.STATUS_COMPLETED)
+        self._combo_status.addItem("Pendiente", C.STATUS_PENDING)
+        self._combo_status.addItem("Descargando", C.STATUS_DOWNLOADING)
+        self._combo_status.addItem("Cancelada", C.STATUS_CANCELLED)
+        self._combo_status.addItem("Fallo", C.STATUS_FAILED)
 
         self._combo_format = self._widget_bus_hist.findChild(
             QComboBox, "comboFormatHist"
         )
         # 'pending' | 'downloading' | 'completed' | 'failed' | 'cancelled'
         self._combo_format.addItem("Todos", None)
-        self._combo_format.addItem("MP4", "mp4")
-        self._combo_format.addItem("MP3", "mp3")
+        self._combo_format.addItem("MP4", C.FORMAT_MP4)
+        self._combo_format.addItem("MP3", C.FORMAT_MP3)
 
     def _setup_table(self):
         font = QFont()
@@ -113,9 +114,9 @@ class HistoryPanel(QObject):
         layout.addWidget(btn_delete)
         layout.addWidget(label)
         # Revisamos que mostrar en acciones segun el estado
-        label.setVisible(download.status in ("pending", "downloading"))
-        btn_delete.setVisible(download.status not in ("pending", "downloading"))
-        btn_retry.setVisible(download.status not in ("pending", "downloading"))
+        label.setVisible(download.status in C.STATUS_ACTIVE)
+        btn_delete.setVisible(download.status not in C.STATUS_ACTIVE)
+        btn_retry.setVisible(download.status not in C.STATUS_ACTIVE)
 
         self._table.setCellWidget(row, self.COL_ACTIONS, widget)
 

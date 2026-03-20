@@ -143,7 +143,9 @@ class SettingsDialog(QDialog):
             "Safari (Mejor calidad de descarga)", C.DEFAULT_PLAYER_CLIENT
         )
         self.combo_player_client.addItem("Web/Android", ["web", "android"])
-        self.combo_player_client.addItem("Todos", ["web_safari", "web", "android"])
+        self.combo_player_client.addItem(
+            "Todos", ["web_safari", "tv_embedded", "web", "android"]
+        )
         self.horizontalClientL.addWidget(self.lbl_client)
         self.horizontalClientL.addWidget(self.combo_player_client)
         self.layoutPrinc.addLayout(self.horizontalClientL)

@@ -29,8 +29,8 @@ STATUS_COLORS = {
     STATUS_PENDING: "#000000",
 }
 
-#Settings Default
-DEFAULT_DESTINATION = Path.home() / "Downloads"
+# Settings Default
+DEFAULT_DESTINATION = Path.home() / "Downloads" / "YTDownloads"
 DEFAULT_MAX_CONCURRENT = 2
 DEFAULT_VIDEO_QUALITY = "bestvideo[height<=1080]+bestaudio/best"
 DEFAULT_AUDIO_QUALITY = "0"
@@ -39,7 +39,7 @@ DEFAULT_SPEED_LIMIT = None
 DEFAULT_PLAYER_CLIENT = ["web_safari"]
 DEFAULT_THEME = "system"
 
-#Nombres de las propiedades en configuracion
+# Nombres de las propiedades en configuracion
 SETTING_DESTINATION = "destination"
 SETTING_MAX_CONCURRENT = "max_concurrent"
 SETTING_VIDEO_QUALITY = "max_vid_qual"

@@ -14,6 +14,7 @@ class SettingsApp:
         path = self._settings.value(
             C.SETTING_DESTINATION, C.DEFAULT_DESTINATION, type=str
         )
+        Path(path).mkdir(exist_ok=True)
         return path
 
     def get_max_concurrent(self) -> int:

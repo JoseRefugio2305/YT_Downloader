@@ -18,7 +18,7 @@ def get_app_dir() -> Path:
     if getattr(sys, "__compiled__", False):
         return Path(sys.executable).parent
     # En desarrollo apuntamos a la raíz del proyecto (donde está main.py)
-    return Path(__file__).parent.parent.parent
+    return Path(__file__).parent.parent.parent.parent
 
 
 # Retorna la carpeta updates/, la crea si no existe

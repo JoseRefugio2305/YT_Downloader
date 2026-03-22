@@ -28,8 +28,7 @@ class UIMainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Form.sizePolicy().hasHeightForWidth())
         Form.setSizePolicy(sizePolicy)
-        Form.setMinimumSize(QSize(1000, 650))
-        Form.setMaximumSize(QSize(1000, 650))
+        Form.setFixedSize(QSize(1000, 650))
         self.verticalLayoutWidget = QWidget(Form)
         self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
         self.verticalLayoutWidget.setGeometry(QRect(0, 0, 1001, 671))
@@ -43,6 +42,7 @@ class UIMainWindow(object):
         font.setBold(True)
         font.setItalic(False)
         self.mainTab.setFont(font)
+        self.mainTab.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
         self.tab_3 = QWidget()
         self.tab_3.setObjectName("tab_3")
         self.inputLink = QLineEdit(self.tab_3)
@@ -134,6 +134,9 @@ class UIMainWindow(object):
         self.btnCleanAll.setStyleSheet(
             "background-color: rgb(107, 114, 128);\n" "color: rgb(255, 255, 255);"
         )
+        self.widgetUpdate = QWidget(self.tab_3)
+        self.widgetUpdate.setObjectName("widgetUpdate")
+        self.widgetUpdate.setGeometry(QRect(10, 610, 981, 0))
         self.mainTab.addTab(self.tab_3, "")
         self.tab_4 = QWidget()
         self.tab_4.setObjectName("tab_4")
@@ -209,7 +212,7 @@ class UIMainWindow(object):
         self.lblInfo.setText(
             QCoreApplication.translate("Form", "Lista de Descargas", None)
         )
-        # self.label.setText(QCoreApplication.translate("Form", u"YT Downloader", None))
+        # self.label.setText(QCoreApplication.translate("Form", "YT Downloader", None))
         self.label.setPixmap(
             QPixmap(str(self.ASSETS_DIR / "logo.png")).scaled(
                 200,

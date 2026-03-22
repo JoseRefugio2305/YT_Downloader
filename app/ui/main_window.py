@@ -1,18 +1,22 @@
 from PySide6.QtWidgets import QMainWindow, QMessageBox, QApplication
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QTimer, QPropertyAnimation, QEasingCurve
 from PySide6.QtGui import QCloseEvent
 from typing import Optional
+from pathlib import Path
 
 from .resources.tabs.main_ui import UIMainWindow
 from .resources.dialogs.settings_dialog import SettingsDialog
 from .resources.download.download_queue import DownloadQueue
 from .resources.tabs.history_panel import HistoryPanel
 from .resources.dialogs.loading_dialog import LoadingDialog
+from .resources.update.update_banner import UpdateBanner
 from ..database.db_manager import DBManager
 from ..core.playlist_manager import PlaylistManager
 from ..core.workers.extract_worker import ExtractInfoWorker
 from ..utils.url_validator import detect_url_type, clean_yt_url, is_valid_url
 from ..core.settings.settings import Settings
+from ..core.updates.updater import CheckUpdateWorker
+from ..core.updates.installer import launch_update_and_exit
 from ..core.logging.logger import get_logger
 
 logger = get_logger(__name__)
@@ -31,12 +35,16 @@ class MainWindow(QMainWindow):
         self._db = DBManager()
         self._manager = PlaylistManager(self._db)
         self._queue = DownloadQueue(self.ui.scrollDownloads, self._manager, self._db)
+        self._update_banner = UpdateBanner(self.ui.widgetUpdate, self)
+        self._update_banner.install_requested.connect(self._on_install_requested)
         self.ui.btnCleanAll.clicked.connect(self._queue._on_clear_finished)
         self._history = HistoryPanel(
             self.ui.tableHistorial, self.ui.widgetBusHistorial, self._queue, self._db
         )
         self._extract_worker = None
+        self._closing_for_update = False
         self._connect_signals()
+        QTimer.singleShot(3000, self._check_for_updates)
 
     def _connect_signals(self):
         # self._manager.item_finished.connect(self._on_item_finished)
@@ -193,7 +201,73 @@ class MainWindow(QMainWindow):
         clipboard = QApplication.clipboard()
         self.ui.inputLink.setText(clipboard.text().strip())
 
+    def _check_for_updates(self):
+        self._check_update_worker = CheckUpdateWorker()
+        self._check_update_worker.update_available.connect(self._on_update_available)
+        self._check_update_worker.no_update.connect(
+            lambda: logger.info("No Existen actualizaciones nuevas disponibles.")
+        )
+        self._check_update_worker.start()
+
+    def _on_update_available(self, new_release: dict):
+        self._update_banner.show_update_available(new_release)
+        self._show_update_banner()
+
+    def _show_update_banner(self):
+        BANNER_HEIGHT = 80
+
+        # Reducimos scroll
+        scroll = self.ui.scrollDownloads
+        scroll_bottom = scroll.y() + scroll.height()
+
+        self.ui.tab_3.setFixedHeight(self.ui.tab_3.height() + BANNER_HEIGHT)
+        self.ui.verticalLayoutWidget.setFixedHeight(
+            self.ui.verticalLayoutWidget.height() + BANNER_HEIGHT
+        )
+
+        self.ui.widgetUpdate.setGeometry(10, scroll_bottom, 981, 0)
+
+        # Animcacion para mostrar banner
+        self.ui.widgetUpdate.setVisible(True)
+
+        self._anim_widget = QPropertyAnimation(self.ui.widgetUpdate, b"maximumHeight")
+        self._anim_widget.setDuration(300)
+        self._anim_widget.setStartValue(0)
+        self._anim_widget.setEndValue(BANNER_HEIGHT)
+        self._anim_widget.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._anim_widget.start()
+
+        self._anim_widget_min = QPropertyAnimation(
+            self.ui.widgetUpdate, b"minimumHeight"
+        )
+        self._anim_widget_min.setDuration(300)
+        self._anim_widget_min.setStartValue(0)
+        self._anim_widget_min.setEndValue(BANNER_HEIGHT)
+        self._anim_widget_min.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._anim_widget_min.start()
+
+        # # Animacion de ventana
+        current_height = self.height()
+        self._anim_window = QPropertyAnimation(self, b"minimumHeight")
+        self._anim_window.setDuration(300)
+        self._anim_window.setStartValue(current_height)
+        self._anim_window.setEndValue(current_height + BANNER_HEIGHT)
+        self._anim_window.valueChanged.connect(lambda v: self.setFixedHeight(v))
+        self._anim_window.setEasingCurve(QEasingCurve.Type.OutCubic)
+        self._anim_window.start()
+
+    def _on_install_requested(self, script_path: str):
+        self._closing_for_update = True
+        launch_update_and_exit(Path(script_path))
+
     def closeEvent(self, event: QCloseEvent):
+
+        if self._closing_for_update:  # Si se cierra por actualizacion
+            self._manager.cancel_all()
+            self._db.close()
+            event.accept()
+            return
+
         msgBox = QMessageBox(self)
         msgBox.setIcon(QMessageBox.Icon.Question)
         msgBox.setWindowTitle("Confirmar salida")
@@ -219,3 +293,7 @@ class MainWindow(QMainWindow):
             event.accept()  # Cierra la ventana
         else:
             event.ignore()  # Cancela el cierre
+
+    def close_for_update(self):
+        self._closing_for_update = True
+        self.close()

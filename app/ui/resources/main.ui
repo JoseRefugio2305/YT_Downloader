@@ -54,7 +54,7 @@
        <cursorShape>ArrowCursor</cursorShape>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_3">
        <attribute name="title">
@@ -312,6 +312,16 @@ color: rgb(255, 255, 255);</string>
         </property>
         <property name="text">
          <string>Limpiar Descargas</string>
+        </property>
+       </widget>
+       <widget class="QWidget" name="widgetUpdate" native="true">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>610</y>
+          <width>981</width>
+          <height>0</height>
+         </rect>
         </property>
        </widget>
       </widget>

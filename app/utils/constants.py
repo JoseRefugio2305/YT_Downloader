@@ -53,3 +53,6 @@ SETTING_THEME = "theme"
 FORMAT_MP4 = "mp4"
 FORMAT_MP3 = "mp3"
 SUPPORTED_FORMATS = (FORMAT_MP4, FORMAT_MP3)
+
+#Constante para grado de similitud al borrar archivos residuales de cancelacion de descarga
+CLEANUP_SIMILARITY_THRESHOLD = 0.6

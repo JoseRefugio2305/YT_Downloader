@@ -130,6 +130,7 @@ class PlaylistManager(QObject):
             return
         new_worker = self._queue[0]  # Tomamos el prmiero
         self._workers[new_worker["id"]] = DownloadWorker(
+            self._db,
             new_worker["url"],
             new_worker["format"],
             new_worker["destination"],
@@ -180,9 +181,7 @@ class PlaylistManager(QObject):
             playlist = self._db.get_playlist_by_id(playlist_id)
             downloads = self._db.get_downloads_by_playlist(playlist_id)
             # Calculamos fallos y completadas con exito
-            failures = len(
-                [d for d in downloads if d.status in C.STATUS_RETRYABLE]
-            )
+            failures = len([d for d in downloads if d.status in C.STATUS_RETRYABLE])
             completed = len([d for d in downloads if d.status == C.STATUS_COMPLETED])
             if (
                 playlist.total_items > 0

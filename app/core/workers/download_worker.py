@@ -1,9 +1,18 @@
 from PySide6.QtCore import QThread, Signal
+from difflib import SequenceMatcher
+from pathlib import Path
+import time
 
 from ..downloader import Downloader
-from ...utils.format_helper import format_file_size, format_duration
+from ...utils.format_helper import (
+    format_file_size,
+    format_duration,
+    get_only_path,
+    is_media_file,
+)
 from ..logging.logger import get_logger
 import app.utils.constants as C
+from ...database.db_manager import DBManager
 
 logger = get_logger(__name__)
 
@@ -20,6 +29,7 @@ class DownloadWorker(QThread):
 
     def __init__(
         self,
+        db: DBManager,
         url: str,
         format: str,
         destination: str,
@@ -28,6 +38,9 @@ class DownloadWorker(QThread):
         audio_quality=None,
     ):
         super().__init__()
+
+        self._db = db
+
         self._cancelled = False
         self.url = url
         self.format = format
@@ -65,6 +78,7 @@ class DownloadWorker(QThread):
                 logger.info(
                     f"DownloadWorker con id {self.download_id} y url {self.url} cancelado"
                 )
+                self._cleanup_partial_files()  # Se hace la limpieza de posibles archivos residuales
                 self.status_changed.emit(C.STATUS_CANCELLED)
                 self.finished.emit(self.download_id, "")
         except Exception as e:
@@ -72,7 +86,10 @@ class DownloadWorker(QThread):
                 f"DownloadWorker con id {self.download_id} y url {self.url} error: {str(e)}"
             )
             if self._cancelled:
-                self.status_changed.emit(C.STATUS_CANCELLED)  # <- cancelación no es fallo
+                self._cleanup_partial_files()  # Se hace la limpieza de posibles archivos residuales
+                self.status_changed.emit(
+                    C.STATUS_CANCELLED
+                )  # <- cancelación no es fallo
             else:
                 self.error.emit(str(e))
                 self.status_changed.emit(C.STATUS_FAILED)
@@ -118,6 +135,50 @@ class DownloadWorker(QThread):
                 f"Postprocesamiento de DownloadWorker con id {self.download_id} y url {self.url} terminado"
             )
             self._final_filepath = data["info_dict"].get("filepath", "")
+
+    def _cleanup_partial_files(self):
+        logger.info(
+            f"Eliminando archivos residuales del video con id: {self.download_id}"
+        )
+        time.sleep(5)
+        try:
+            download = self._db.get_download_by_id(self.download_id)
+            download_title = download.title
+            is_med_file = is_media_file(self.destination)
+            destination = Path(self.destination)
+            if is_med_file:
+                _, folder, _, _ = get_only_path(destination)
+                destination = Path(folder)
+            partial_extensions = {
+                ".part",
+                ".ytdl",
+                ".mp4",
+                ".webm",".webp",
+                ".m4a",
+                ".mp3",
+            }  # Posibles extensiones de archivos parciales residuales despues de cancelacion
+
+            for file in destination.iterdir():
+                if file.suffix not in partial_extensions:
+                    continue
+                coincidencia = SequenceMatcher(
+                    None, file.stem.lower(), download_title.lower()
+                ).ratio()
+                if coincidencia >= C.CLEANUP_SIMILARITY_THRESHOLD:
+                    try:
+                        file.unlink()
+                        logger.info(
+                            f"Borrando el archivo residual: {str(file)} (similitud: {coincidencia:.2f}), de la descarga: {download_title} {self.download_id}"
+                        )
+                    except PermissionError:
+                        logger.warning(
+                            f"No se pudo eliminar {file.name}, archivo en uso. Se omite."
+                        )
+
+        except Exception as e:
+            logger.error(
+                f"Error al intentar eliminar archivos residuales del video con id: {self.download_id} {str(e)}"
+            )
 
     def cancel(self):
         self._cancelled = True

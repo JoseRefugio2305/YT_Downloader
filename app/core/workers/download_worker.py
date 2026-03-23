@@ -153,7 +153,8 @@ class DownloadWorker(QThread):
                 ".part",
                 ".ytdl",
                 ".mp4",
-                ".webm",".webp",
+                ".webm",
+                ".webp",
                 ".m4a",
                 ".mp3",
             }  # Posibles extensiones de archivos parciales residuales despues de cancelacion

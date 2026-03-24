@@ -85,8 +85,8 @@ class DownloadWorker(QThread):
             logger.error(
                 f"DownloadWorker con id {self.download_id} y url {self.url} error: {str(e)}"
             )
+            self._cleanup_partial_files()  # Se hace la limpieza de posibles archivos residuales
             if self._cancelled:
-                self._cleanup_partial_files()  # Se hace la limpieza de posibles archivos residuales
                 self.status_changed.emit(
                     C.STATUS_CANCELLED
                 )  # <- cancelación no es fallo

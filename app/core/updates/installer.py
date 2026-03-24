@@ -1,18 +1,21 @@
 from pathlib import Path
 import py7zr
+from py7zr.callbacks import ExtractCallback
 import os
 import textwrap
 import subprocess
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QThread, Signal
 import shutil
 
 from .updater import get_updates_dir
 from ..logging.logger import get_logger
+from ...utils.format_helper import format_file_size
 
 logger = get_logger(__name__)
 
 
-def extract_update(archive_path: str) -> Path:
+def extract_update(archive_path: str, on_progress: None) -> Path:
     try:
         updates_dir = get_updates_dir()
         update_file = Path(archive_path)
@@ -25,7 +28,15 @@ def extract_update(archive_path: str) -> Path:
 
         with py7zr.SevenZipFile(update_file, mode="r") as update:
             logger.info(f"Iniciando extracción de {update_file}")
-            update.extractall(extracted_dir)
+            total_to_extract = update.archiveinfo().uncompressed
+            callback = (
+                _ProgressCallback(
+                    lambda extracted: on_progress(extracted, total_to_extract)
+                )
+                if on_progress
+                else None
+            )
+            update.extractall(extracted_dir, callback=callback)
             logger.info(f"Termino la extracción de {update_file}")
     except Exception as e:
         logger.error(f"Error en extracción de {update_file}: {str(e)}")
@@ -116,3 +127,65 @@ def launch_update_and_exit(script_path: Path) -> bool:
     QApplication.instance().quit()
 
     return True
+
+
+# Con este worker se llevaran a cabo la extraccion del archivo con la actualizacion de forma que no se congele la aplicacion cuando este proceso dure muco tiempo
+class ExtractUpdateWorker(QThread):
+    extract_finished = Signal(str)  # Termino exitoso, emite la ruta de la extraccion
+    extract_failed = Signal(str)  # Fallo, recibe el mensaje de error
+    progress = Signal(int)  # Progreso
+    message_status = Signal(list)  # Total extraido
+
+    def __init__(self, archive_path: str):
+        super().__init__()
+        self._archive_path = archive_path
+        self._f_name = Path(archive_path).stem
+
+    def run(self):
+        try:
+            extr_dir = extract_update(self._archive_path, self._callback_extract)
+            self.extract_finished.emit(str(extr_dir))
+        except Exception as e:
+            logger.error(
+                f"Ocurrió un error al intentar extraer la información del archivo de actualización: {str(e)}"
+            )
+            self.extract_failed.emit(
+                f"Ocurrió un error al intentar extraer la información del archivo de actualización: {str(e)}"
+            )
+
+    def _callback_extract(self, extracted_bytes: int, total_bytes: int):
+        if total_bytes:
+            percent = int(extracted_bytes * 100 / total_bytes)
+            self.progress.emit(percent)
+        self.message_status.emit(
+            [
+                f"Extrayendo información de {str(self._f_name)}",
+                f"{format_file_size(extracted_bytes)} / {format_file_size(total_bytes)}",
+            ]
+        )
+
+
+# Necsitamos esta clase para crear la funcion callback
+class _ProgressCallback(ExtractCallback):
+    def __init__(self, on_progress):
+        self._on_progress = on_progress
+        self._extracted_bytes = 0
+
+    def report_start_preparation(self):
+        pass
+
+    def report_start(self, processing_file_path, processing_bytes):
+        pass
+
+    def report_update(self, decompressed_bytes):
+        self._extracted_bytes += int(decompressed_bytes)
+        self._on_progress(self._extracted_bytes)
+
+    def report_end(self, processing_file_path, wrote_bytes):
+        pass
+
+    def report_postprocess(self):
+        pass
+
+    def report_warning(self, warning):
+        pass

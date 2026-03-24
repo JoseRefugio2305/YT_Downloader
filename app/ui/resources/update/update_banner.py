@@ -8,17 +8,19 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QDialog,
 )
-from PySide6.QtCore import QObject, Qt, QTimer,Signal
+from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QFont, QCursor
+from pathlib import Path
 
+from ..dialogs.extract_update_dialog import ExtractUpdateDialog
 from ..dialogs.update_confirm_dialog import UpdateConfirmDialog
 from ....core.workers.update_worker import UpdateWorker
-from ....core.updates.updater import get_release_tag, get_download_url, get_app_dir
+from ....core.updates.updater import get_download_url, get_app_dir
 from ....core.logging.logger import get_logger
 from ....core.updates.installer import (
     extract_update,
     create_update_script,
-    launch_update_and_exit,
+    ExtractUpdateWorker,
 )
 import app.utils.version as V
 
@@ -34,6 +36,7 @@ class UpdateBanner(QObject):
         self._container = container
         self._release = None
         self._worker = None
+        self._extract_worker = None
         self._downloaded_path = None
         self._setup_ui()
 
@@ -69,7 +72,7 @@ class UpdateBanner(QObject):
         font2.setItalic(False)
         self._page2_down = QWidget()
         layout_princ_p2 = QHBoxLayout(self._page2_down)
-        layout_prog_p2=QVBoxLayout()
+        layout_prog_p2 = QVBoxLayout()
         self._lbl_down_status = QLabel("Descargando Actualización")
         self._lbl_down_status.setFont(font1)
         self._progress_bar = QProgressBar()
@@ -101,6 +104,7 @@ class UpdateBanner(QObject):
         self._btn_install.setStyleSheet(
             "background-color: rgb(108, 9, 200);\n" "color: rgb(255, 255, 255);"
         )
+        self._btn_install.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self._btn_install.setFont(font1)
         self._btn_install.clicked.connect(self._on_install_clicked)
         layout_p3.addWidget(self._lbl_done)
@@ -119,6 +123,7 @@ class UpdateBanner(QObject):
         self._btn_retry.setStyleSheet(
             "background-color: #FC8A00;\n" "color: rgb(255, 255, 255);"
         )
+        self._btn_retry.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self._btn_retry.setFont(font1)
         self._btn_retry.clicked.connect(self._on_retry_clicked)
         layout_p4.addWidget(self._lbl_error)
@@ -183,19 +188,25 @@ class UpdateBanner(QObject):
             self._show_error("No existe un archivo de actualización descargado.")
             return
 
-        try:
-            extracted_dir = extract_update(self._downloaded_path)
-        except Exception as e:
-            logger.error(
-                f"Ocurrió un error al intentar extraer la información del archivo de actualización: {str(e)}"
-            )
-            self._show_error(
-                f"Ocurrió un error al intentar extraer la información del archivo de actualización: {str(e)}"
-            )
-            return
+        self._extract_dialog = ExtractUpdateDialog(self._container)
 
-        script_path = create_update_script(extracted_dir, get_app_dir())
+        self._extract_worker = ExtractUpdateWorker(self._downloaded_path)
+        self._extract_worker.extract_finished.connect(self._start_extract)
+        self._extract_worker.extract_finished.connect(self._extract_dialog.accept)
+        self._extract_worker.extract_failed.connect(self._show_error)
+        self._extract_worker.extract_failed.connect(self._extract_dialog.reject)
+        self._extract_worker.progress.connect(self._extract_dialog.update_progress_bar)
+        self._extract_worker.message_status.connect(
+            self._extract_dialog.update_progress_msg
+        )
+        QTimer.singleShot(
+            500, self._extract_worker.start
+        )  # Despues de 500 mls ejecutamos extractworker para dar tiempo a que se muestre el dialog de carga
+        self._extract_dialog.show()
+        self._extract_dialog.exec()
 
+    def _start_extract(self, extracted_dir: str):
+        script_path = create_update_script(Path(extracted_dir), get_app_dir())
         self.install_requested.emit(str(script_path))
 
     def _on_retry_clicked(self):

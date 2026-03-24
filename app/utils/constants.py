@@ -54,5 +54,16 @@ FORMAT_MP4 = "mp4"
 FORMAT_MP3 = "mp3"
 SUPPORTED_FORMATS = (FORMAT_MP4, FORMAT_MP3)
 
-#Constante para grado de similitud al borrar archivos residuales de cancelacion de descarga
+# Constante para grado de similitud al borrar archivos residuales de cancelacion de descarga
 CLEANUP_SIMILARITY_THRESHOLD = 0.6
+
+# Gifs de loading
+LOADING_GIFS_LIST = [
+    "loading.gif",
+    "l_1.gif",
+    "l_2.gif",
+    "l_3.gif",
+    "l_4.gif",
+    "l_5.gif",
+    "l_6.gif",
+]

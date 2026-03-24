@@ -2,10 +2,19 @@ from PySide6.QtCore import QSize, Qt
 from PySide6.QtGui import QFont, QMovie
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QDialog, QProgressBar, QHBoxLayout
 from pathlib import Path
+import random
+
+from ....utils.constants import LOADING_GIFS_LIST
 
 
 class ExtractUpdateDialog(QDialog):
     ASSETS_DIR = Path(__file__).parent.parent.parent.parent.parent / "assets"
+
+    GIF = (
+        LOADING_GIFS_LIST[0]
+        if random.random() < 0.92
+        else random.choice(LOADING_GIFS_LIST)
+    )
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -40,7 +49,7 @@ class ExtractUpdateDialog(QDialog):
         self.lblPercent.setFont(font)
         self.lblPercent.setFixedWidth(45)
         self.horizontalProgL.addWidget(self.lblPercent)
-        self.loading_gif = QMovie(str(self.ASSETS_DIR / "loading.gif"))
+        self.loading_gif = QMovie(str(self.ASSETS_DIR / self.GIF))
         self.loading_gif.setScaledSize(QSize(200, 200))
         self.label_gif = QLabel(self)
         self.label_gif.setAlignment(Qt.AlignCenter)

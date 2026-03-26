@@ -33,7 +33,9 @@ class MainWindow(QMainWindow):
         self.ui.btnCancelAll.clicked.connect(self._on_cancel_all_clicked)
         self._settings = SettingsDialog(self)
         self._db = DBManager()
-        self._manager = PlaylistManager(self._db)
+        self._manager = PlaylistManager(
+            db=self._db, max_concurrent=Settings.get_max_concurrent()
+        )
         self._queue = DownloadQueue(self.ui.scrollDownloads, self._manager, self._db)
         self._update_banner = UpdateBanner(self.ui.widgetUpdate, self)
         self._update_banner.install_requested.connect(self._on_install_requested)

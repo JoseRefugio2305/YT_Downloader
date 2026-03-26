@@ -27,6 +27,9 @@ class PlaylistManager(QObject):
         self._queue: list[dict] = []  # Lista de espera en descargas
         self.max_concurrent = max_concurrent
 
+        self._delay_pending = False
+        self._last_finished_time = 0
+
     def enqueue(
         self,
         title,
@@ -128,6 +131,11 @@ class PlaylistManager(QObject):
             if not self._workers:  # Si tampoco hay elementos en proceso de descarga
                 self.all_finished.emit()  # Como no recibe argumentos solo se emite la se;al
             return
+
+        # Si hay un delay activo no iniciamos nada
+        if self._delay_pending:
+            return
+
         new_worker = self._queue[0]  # Tomamos el prmiero
         self._workers[new_worker["id"]] = DownloadWorker(
             self._db,
@@ -195,6 +203,12 @@ class PlaylistManager(QObject):
         # Revisamos primero si hay delay aplicado, de haberlo se aplica antes de llamar a la seguiente descarga
         delay_ms = Settings.get_download_delay() * 1000
         if delay_ms > 0:
-            QTimer.singleShot(delay_ms, self._start_next)
+            self._delay_pending = True
+            QTimer.singleShot(delay_ms, self._on_delay_finished)
         else:
             self._start_next()  # Revisamos si hay algun otro elemento en la cola
+
+
+    def _on_delay_finished(self):
+        self._delay_pending = False
+        self._start_next()
